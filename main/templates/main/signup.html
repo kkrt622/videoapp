@@ -20,10 +20,14 @@
         {% endfor %}
         {% endif %}
         <div class="registration-form-field">
-            <label for="{{ form.password.id_for_label }}">パスワード:</label>
+            <label for="{{ form.password.id_for_label }}"></label>
             {{ form.password }}
         </div>
-        <p>利用規約とプライバシーポリシーに同意する</p>
+        <p><input type="checkbox" id="consent-chk" name="consent-chk" required>
+            <label for="consent-chk">
+                <a href=""><span>利用規約</span>と<a href=""><span>プライバシーポリシー</span></a>に同意する
+            </label>
+        </p>
         <button type="submit" class="registration-form-btn">アカウント作成を完了</button>
     </form>
 </div>

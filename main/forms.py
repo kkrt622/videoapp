@@ -13,15 +13,13 @@ class EmailAuthenticationForm(forms.Form):
     email = forms.EmailField(
         label=_("Email"),
         widget=forms.EmailInput(
-            attrs={
-                "autofocus": True,
-            }
+            attrs={"autofocus": True, "placeholder": "メールアドレス", "class": "form"}
         ),
     )
     password = forms.CharField(
         label=_("Password"),
         strip=False,
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput({"placeholder": "パスワード", "class": "form"}),
     )
     error_messages = {
         "invalid_login": _("Eメールアドレスまたはパスワードに誤りがあります。"),
@@ -71,19 +69,33 @@ class EmailAuthenticationForm(forms.Form):
 
 
 class RegistrationEmailForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].widget.attrs["class"] = "form"
+        self.fields["email"].widget.attrs["placeholder"] = "メールアドレス"
+
     class Meta:
         model = User
         fields = ("email",)
 
 
 class RegistrationCodeForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["code"].widget.attrs["class"] = "form"
+        self.fields["code"].widget.attrs["placeholder"] = "認証コード(数字4ケタ)"
+
     class Meta:
         model = AuthenticationCode
         fields = ("code",)
 
 
 class PasswordForm(forms.ModelForm):
-    password = forms.CharField(widget=PasswordInput())
+    password = forms.CharField(
+        widget=PasswordInput(
+            attrs={"autofocus": True, "placeholder": "パスワード", "class": "form"}
+        ),
+    )
 
     class Meta:
         model = User

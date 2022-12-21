@@ -11,7 +11,7 @@ IMAGE_QUOLITY_CHOICE = (("low", "低画質"), ("standard", "標準"), ("high", "
 
 
 class User(AbstractUser):
-    username = models.CharField("ユーザ名", max_length=50, unique=True)
+    username = models.CharField("ユーザ名", max_length=50, blank=True)
     email = models.EmailField("メールアドレス", unique=True)
     profile = models.TextField("プロフィール", max_length=500, null=True)
     icon = models.ImageField("アイコン", upload_to="icon/", blank=True)

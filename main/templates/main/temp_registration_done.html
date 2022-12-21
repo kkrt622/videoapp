@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_style %}
-<link rel="stylesheet" href="{% static 'main/css/temp_registration.css' %}">
+<link rel="stylesheet" href="{% static 'main/css/temp_registration_done.css' %}">
 {% endblock %}
 
 {% block header %}
@@ -19,7 +19,6 @@
         {% endif %}
         <p class="registration-form-text">{{user.email}}に数字4桁の認証コードを送信しました。<br>下のテキストボックスに記入してください。</p>
         <div class="registration-form-field">
-            <label for="{{ form.code.id_for_label }}">認証コード</label>
             {{ form.code }}
         </div>
         <button type="submit" class="registration-form-btn">認証してパスワード登録に進む</button>
