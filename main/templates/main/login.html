@@ -1,0 +1,41 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block extra_style %}
+<link rel="stylesheet" href="{% static 'main/css/login.css' %}">
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="login-form-container">
+    <h1>Video App</h1>
+    <h1>ログイン</h1>
+    <form action="{% url 'login' %}" method="POST" class="login-form">
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="login-form-error">ユーザー名とパスワードが一致しません。</div>
+        {% endif %}
+        <div class="login-form-field">
+            <label for="{{ form.email.id_for_label }}">メールアドレス:</label>
+            {{ form.email }}
+        </div>
+        <div class="login-form-field">
+            <label for="{{ form.password.id_for_label }}">パスワード:</label>
+            {{ form.password }}
+        </div>
+        <button type="submit" class="login-form-btn">送信</button>
+    </form>
+    <p class="caption">アカウントをお持ちでないですか？</p>
+    <a href="{% url 'temp_registration' %}">
+        <span>新規登録</span>
+    </a>
+    <a href="">
+        <span>パスワードをリセットする</span>
+    </a>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

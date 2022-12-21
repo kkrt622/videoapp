@@ -31,11 +31,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "main",
-    "accounts.apps.AccountsConfig",
-    "django.contrib.sites",
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
 ]
 
 MIDDLEWARE = [
@@ -110,42 +105,24 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
-
 STATIC_URL = "static/"
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "main.backends.EmailAuthBackend",
+]
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = "accounts.User"
+LOGIN_URL = "login"
 
-SITE_ID = 1
+LOGIN_REDIRECT_URL = "home"
 
-AUTHENTICATION_BACKENDS = (
-    "allauth.account.auth_backends.AuthenticationBackend",
-    "django.contrib.auth.backends.ModelBackend",
-)
+LOGOUT_REDIRECT_URL = "login"
 
-# ログインに使用する方法
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_USERNAME_REQUIRED = False
-
-# サインアップ時のメール認証
-# mandatoryの場合はメールが承認されるまでログインできない
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-ACCOUNT_EMAIL_REQUIRED = True
-
-LOGIN_REDIRECT_URL = ""
-ACCOUNT_LOGOUT_REDIRECT_URL = ""
-
-# GETリクエストでログアウトするかどうか
-ACCOUNT_LOGOUT_ON_GET = True
-
-ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
+AUTH_USER_MODEL = "main.User"
 
 DEFAUTL_FROM_EMAIL = "admin@example.com"
 
