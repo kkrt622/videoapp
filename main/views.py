@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.views import generic
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model, login, authenticate
 from django.core.mail import send_mail
 from django.template.loader import get_template
@@ -106,6 +107,7 @@ class SignUpView(generic.FormView):
         user = User.objects.filter(id=user_id)
         email = get_object_or_404(User, id=user_id).email
         password = form.cleaned_data["password"]
+        password = make_password(password)
         user.update(password=password, is_registered=True)
         user = authenticate(email=email, password=password)
         if user:

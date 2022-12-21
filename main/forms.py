@@ -11,13 +11,11 @@ User = get_user_model()
 
 class EmailAuthenticationForm(forms.Form):
     email = forms.EmailField(
-        label=_("Email"),
         widget=forms.EmailInput(
             attrs={"autofocus": True, "placeholder": "メールアドレス", "class": "form"}
         ),
     )
     password = forms.CharField(
-        label=_("Password"),
         strip=False,
         widget=forms.PasswordInput({"placeholder": "パスワード", "class": "form"}),
     )
@@ -29,7 +27,6 @@ class EmailAuthenticationForm(forms.Form):
     def __init__(self, request=None, *args, **kwargs):
         self.request = request
         self.user_cache = None
-        kwargs.setdefault("label_suffix", "")
         super().__init__(*args, **kwargs)
         self.email_field = User._meta.get_field("email")
         if self.fields["email"].label is None:
