@@ -44,6 +44,12 @@ span {
     display: inline;
 }
 
+.regenerate-code-form {
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
 .registration-link {
     padding-bottom: 24px;
 }

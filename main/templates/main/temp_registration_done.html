@@ -22,9 +22,9 @@
             {{ form.code }}
         </div>
         <p class="caption">メールが届きませんか？</p>
-        <a href="{% url 'temp_registration_done' user.id %}">
+        <button href="{% url 'temp_registration_done' user.id %}" name="regenerate-code-btn">
             <span>再送する</span>
-        </a>
+        </button>
         <button type="submit" class="registration-form-btn">認証してパスワード登録に進む</button>
     </form>
 </div>

@@ -1,5 +1,4 @@
 body {
-    margin: 0 4vw;
     font-family: Helvetica, Arial, sans-serif;
 }
 
@@ -10,6 +9,10 @@ a {
 
 h1 {
     font-size: 20px;
+}
+
+.main {
+    margin: 0 4vw;
 }
 
 .footer {
