@@ -15,7 +15,7 @@
     <form action="{% url 'temp_registration' %}" method="POST" class="registration-form">
         {% csrf_token %}
         {% if form.errors %}
-        <div class="registration-form-error">入力されたメールアドレスは既に登録されています。</div>
+        <div class="registration-form-error">{{form.email.errors}}</div>
         {% endif %}
         <div class="registration-form-field">
             {{ form.email }}

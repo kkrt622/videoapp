@@ -1,7 +1,9 @@
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model, authenticate
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import PasswordChangeForm
 from .models import AuthenticationCode
+from django.core.exceptions import ValidationError
 from django.forms.widgets import PasswordInput
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import capfirst
@@ -71,6 +73,14 @@ class RegistrationEmailForm(forms.ModelForm):
         self.fields["email"].widget.attrs["class"] = "form"
         self.fields["email"].widget.attrs["placeholder"] = "メールアドレス"
 
+    # 既に本登録されているユーザーは排除する
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        user = User.objects.filter(email=email, is_registered=True)
+        if user.exists():
+            raise ValidationError("このメールアドレスは既に使われているようです。")
+        return email
+
     class Meta:
         model = User
         fields = ("email",)
@@ -97,3 +107,45 @@ class PasswordForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ("password",)
+
+
+class PasswordResetForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].widget.attrs["class"] = "form"
+        self.fields["email"].widget.attrs["placeholder"] = "メールアドレス"
+
+    class Meta:
+        model = User
+        fields = ("email",)
+
+
+class PasswordResetConfirmationForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["code"].widget.attrs["class"] = "form"
+        self.fields["code"].widget.attrs["placeholder"] = "認証コード(数字4ケタ)"
+
+    class Meta:
+        model = AuthenticationCode
+        fields = ("code",)
+
+
+class PasswordChangeForm(forms.Form):
+    new_password1 = forms.CharField(
+        widget=PasswordInput({"placeholder": "新しいパスワード", "class": "form"})
+    )
+    new_password2 = forms.CharField(
+        widget=PasswordInput({"placeholder": "新しいパスワード(確認)", "class": "form"})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        new_password1 = self.cleaned_data["new_password1"]
+        new_password2 = self.cleaned_data["new_password2"]
+        if len(new_password1) < 6:
+            raise ValidationError("6文字以上にしてください")
+        if new_password1 != new_password2:
+            raise ValidationError("パスワードが一致しません")

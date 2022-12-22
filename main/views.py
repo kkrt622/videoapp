@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import (
+    LoginView,
+    PasswordChangeView,
+)
 from django.views import generic
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model, login, authenticate
@@ -14,6 +17,9 @@ from .forms import (
     RegistrationEmailForm,
     RegistrationCodeForm,
     PasswordForm,
+    PasswordResetForm,
+    PasswordResetConfirmationForm,
+    PasswordChangeForm,
 )
 
 User = get_user_model()
@@ -21,6 +27,14 @@ User = get_user_model()
 
 def home(request):
     return render(request, "main/home.html")
+
+
+def generate_random_code(email):
+    random_number = random.randrange(1000, 9999)
+    AuthenticationCode.objects.update_or_create(
+        email=email, defaults={"code": random_number, "email": email}
+    )
+    return random_number
 
 
 class LoginView(LoginView):
@@ -34,13 +48,6 @@ class TempRegistrationView(generic.FormView):
     form_class = RegistrationEmailForm
     model = User
 
-    def generate_random_code(self, email):
-        random_number = random.randrange(1000, 9999)
-        AuthenticationCode.objects.update_or_create(
-            email=email, defaults={"code": random_number, "email": email}
-        )
-        return random_number
-
     def form_valid(self, form, **kwargs):
         context = super().get_context_data(**kwargs)
         context["email"] = form.cleaned_data["email"]
@@ -48,7 +55,7 @@ class TempRegistrationView(generic.FormView):
 
         # メール送信
         message_template = get_template("mail_text/registration.txt")
-        random_code = self.generate_random_code(email)
+        random_code = generate_random_code(email)
         context = {
             "email": email,
             "random_code": random_code,
@@ -60,9 +67,9 @@ class TempRegistrationView(generic.FormView):
         send_mail(subject, message, from_email, recipient_list)
 
         # 仮登録処理
-        user = form.save(commit=False)
-        user.is_registered = False
-        user.save()
+        user, created = User.objects.get_or_create(
+            email=email, defaults={"is_registered": False}
+        )
         return redirect("temp_registration_done", user.id)
 
 
@@ -80,7 +87,6 @@ class TempRegistrationDoneView(generic.FormView):
         authentication_code = AuthenticationCode.objects.get(email=email).code
         if int(input_code) == authentication_code:
             return redirect("signup", user.id)
-
         return render(self.request, "main/temp_registration_done.html")
 
     def get_context_data(self, **kwargs):
@@ -112,6 +118,79 @@ class SignUpView(generic.FormView):
         user = authenticate(email=email, password=password)
         if user:
             login(self.request, user)
+        return super().form_valid(form, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.kwargs["user_id"]
+        user = get_object_or_404(User, pk=user_id)
+        context["user"] = user
+        return context
+
+
+class PasswordResetView(generic.FormView):
+    template_name = "main/password_reset.html"
+    form_class = PasswordResetForm
+    model = User
+
+    def form_valid(self, form, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["email"] = form.cleaned_data["email"]
+        email = self.request.POST.get("email")
+        print(email)
+
+        # メール送信
+        message_template = get_template("mail_text/password_reset.txt")
+        random_code = generate_random_code(email)
+        context = {
+            "email": email,
+            "random_code": random_code,
+        }
+        subject = "パスワードの再設定について"
+        message = message_template.render(context)
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = ([email],)
+        send_mail(subject, message, from_email, recipient_list)
+
+        user = get_object_or_404(User, email=email)
+        return redirect("password_reset_confirmation", user.id)
+
+
+class PasswordResetConfirmationView(generic.FormView):
+    template_name = "main/password_reset_confirmation.html"
+    form_class = PasswordResetConfirmationForm
+    model = AuthenticationCode
+    success_url = reverse_lazy("password_reset_confirmation")
+
+    def form_valid(self, form, **kwargs):
+        user_id = self.kwargs["user_id"]
+        user = get_object_or_404(User, pk=user_id)
+        email = user.email
+        input_code = self.request.POST.get("code")
+        authentication_code = AuthenticationCode.objects.get(email=email).code
+        if int(input_code) == authentication_code:
+            return redirect("password_change", user.id)
+        return render(self.request, "main/password_reset_confirmation.html")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.kwargs["user_id"]
+        user = get_object_or_404(User, pk=user_id)
+        context["user"] = user
+        return context
+
+
+class PasswordChangeView(generic.FormView):
+    template_name = "main/password_change.html"
+    form_class = PasswordChangeForm
+    success_url = reverse_lazy("login")
+
+    def form_valid(self, form, **kwargs):
+        user_id = self.kwargs["user_id"]
+        user = User.objects.filter(id=user_id)
+        new_password = form.cleaned_data["new_password1"]
+        new_password = make_password(new_password)
+        user.update(password=new_password)
         return super().form_valid(form, **kwargs)
 
     def get_context_data(self, **kwargs):

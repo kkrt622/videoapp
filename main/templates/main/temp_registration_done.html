@@ -21,12 +21,12 @@
         <div class="registration-form-field">
             {{ form.code }}
         </div>
+        <p class="caption">メールが届きませんか？</p>
+        <a href="{% url 'temp_registration_done' user.id %}">
+            <span>再送する</span>
+        </a>
         <button type="submit" class="registration-form-btn">認証してパスワード登録に進む</button>
     </form>
-    <p class="caption">メールが届きませんか</p>
-    <a href="">
-        <span>再送する</span>
-    </a>
 </div>
 {% endblock %}
 
