@@ -14,8 +14,13 @@
 <body>
     {% block header %}
     <header class="header">
-        <div class="header__title">
-            {% block header_title %}{% endblock %}
+        <div class="header__item">
+            <div class="header__title">
+                {% block header_title %}Video App{% endblock %}
+            </div>
+            <a href="" class="header__link">
+                <div class="header__icon"><i class="fas fa-user"></i></div>
+            </a>
         </div>
     </header>
     {% endblock %}
