@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "main",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -126,4 +127,10 @@ AUTH_USER_MODEL = "main.User"
 
 DEFAUTL_FROM_EMAIL = "admin@example.com"
 
-MEDIA_URL = "/media/"
+STATIC_URL = "static/"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+AWS_LOCATION = "/static/"
+AWS_STORAGE_BUCKET_NAME = "s3-test-original-video"

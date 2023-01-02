@@ -3,9 +3,10 @@ from django.contrib.auth.views import (
     LoginView,
     PasswordChangeView,
 )
-from django.views import generic
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model, login, authenticate
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView, FormView
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.conf import settings
@@ -20,13 +21,14 @@ from .forms import (
     PasswordResetForm,
     PasswordResetConfirmationForm,
     PasswordChangeForm,
+    VideoUploadForm,
 )
 
 User = get_user_model()
 
 
-def home(request):
-    return render(request, "main/home.html")
+class HomeView(LoginRequiredMixin, TemplateView):
+    template_name = "main/home.html"
 
 
 def generate_random_code(email):
@@ -43,7 +45,7 @@ class LoginView(LoginView):
     redirect_authenticated_user = True
 
 
-class TempRegistrationView(generic.FormView):
+class TempRegistrationView(FormView):
     template_name = "main/temp_registration.html"
     form_class = RegistrationEmailForm
     model = User
@@ -73,7 +75,7 @@ class TempRegistrationView(generic.FormView):
         return redirect("temp_registration_done", user.id)
 
 
-class TempRegistrationDoneView(generic.FormView):
+class TempRegistrationDoneView(FormView):
     template_name = "main/temp_registration_done.html"
     form_class = RegistrationCodeForm
     model = AuthenticationCode
@@ -102,7 +104,7 @@ def regenerate_code(request):
     return render(request, "main/temp_registration_done.html")
 
 
-class SignUpView(generic.FormView):
+class SignUpView(FormView):
     template_name = "main/signup.html"
     form_class = PasswordForm
     model = User
@@ -128,7 +130,7 @@ class SignUpView(generic.FormView):
         return context
 
 
-class PasswordResetView(generic.FormView):
+class PasswordResetView(FormView):
     template_name = "main/password_reset.html"
     form_class = PasswordResetForm
     model = User
@@ -156,7 +158,7 @@ class PasswordResetView(generic.FormView):
         return redirect("password_reset_confirmation", user.id)
 
 
-class PasswordResetConfirmationView(generic.FormView):
+class PasswordResetConfirmationView(FormView):
     template_name = "main/password_reset_confirmation.html"
     form_class = PasswordResetConfirmationForm
     model = AuthenticationCode
@@ -180,7 +182,7 @@ class PasswordResetConfirmationView(generic.FormView):
         return context
 
 
-class PasswordChangeView(generic.FormView):
+class PasswordChangeView(FormView):
     template_name = "main/password_change.html"
     form_class = PasswordChangeForm
     success_url = reverse_lazy("login")
@@ -199,3 +201,13 @@ class PasswordChangeView(generic.FormView):
         user = get_object_or_404(User, pk=user_id)
         context["user"] = user
         return context
+
+
+class VideoUploadView(LoginRequiredMixin, FormView):
+    template_name = "main/video_upload.html"
+    form_class = VideoUploadForm
+    # アカウントページに移行する必要あり
+    success_url = reverse_lazy("home")
+
+    def form_valid(self, form, **kwargs):
+        return super().form_valid(form, **kwargs)

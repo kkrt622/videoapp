@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model, authenticate
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
-from .models import AuthenticationCode
+from .models import AuthenticationCode, Video
 from django.core.exceptions import ValidationError
 from django.forms.widgets import PasswordInput
 from django.utils.translation import gettext_lazy as _
@@ -149,3 +149,9 @@ class PasswordChangeForm(forms.Form):
             raise ValidationError("6文字以上にしてください")
         if new_password1 != new_password2:
             raise ValidationError("パスワードが一致しません")
+
+
+class VideoUploadForm(forms.ModelForm):
+    class Meta:
+        model = Video
+        fields = ("title", "description", "thumbnail", "video")

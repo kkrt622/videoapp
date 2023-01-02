@@ -40,7 +40,7 @@ class Video(models.Model):
     description = models.TextField("説明", max_length=500)
     thumbnail = models.ImageField("サムネイル", upload_to="thumbnail/")
     uploaded_date = models.DateTimeField("動画投稿時刻", auto_now_add=True)
-    filename = models.CharField("ファイル名", max_length=200)
+    video = models.FileField("ビデオファイル", upload_to="uploaded_video/")
     views_count = models.IntegerField("視聴回数", default=0)
 
     class Meta:
