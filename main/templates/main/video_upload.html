@@ -15,17 +15,26 @@
         {% if form.errors %}
         <div class="upload-form-error">{{form.email.errors}}</div>
         {% endif %}
-        <div class="upload-form-field">
+        <div class="thumbnail-form-field">
             {{ form.thumbnail }}
         </div>
-        <div class="upload-form-field">
+        <div class="title-form-field">
+            <div class="title-form-lead">
+                <label class="title-form-label" for="{{form.title.label}}">タイトル</label>
+                <p id="title-form-length">0/50</p>
+            </div>
             {{ form.title }}
         </div>
-        <div class="upload-form-field">
+        <hr>
+        <div class="description-form-field">
+            <div class="description-form-lead">
+                <label for="{{form.description.label}}">詳細文</label>
+                <p id="description-form-length">0/500</p>
+            </div>
             {{ form.description }}
         </div>
-        <div class="upload-form-field">
-            {{ form.video }}
+        <div class="video-form-field">
+            <label class="video-upload-btn">{{ form.video }}</label>
         </div>
         <button type="submit" class="upload-form-btn">動画をアップロード</button>
     </form>
@@ -33,4 +42,8 @@
 {% endblock %}
 
 {% block footer %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'main/js/video_upload.js' %}"></script>
 {% endblock %}

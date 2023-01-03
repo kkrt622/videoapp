@@ -2,5 +2,37 @@
 {% load static %}
 
 {% block extra_style %}
-<link rel="stylesheet" href="">
+<link rel="stylesheet" href="{% static 'main/css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="video-container">
+
+    {% for video in videos %}
+    <a class="video-information-container" href="{% url 'video_play' video.id %}">
+        <div class="video-thumbnail-wrapper">
+            <img src="{% static 'main/img/スクリーンショット 2022-12-31 20.34.16.png' %}">
+        </div>
+        <div class="video-detail-container">
+            <div class="icon-wrapper">
+                <img src="{% static 'main/img/スクリーンショット 2022-12-31 20.34.16.png' %}">
+            </div>
+            <div class="text-wrapper">
+                <p class="video-title">{{video.title}}</p>
+                <div class="video-detail-wrapper">
+                    <p class="video-creator">{{video.user.username}}</p>
+                    <span>・</span>
+                    <p class="video-views">{{video.views_count}}回視聴</p>
+                    <span>・</span>
+                    <p class="video-uploaded-at">{{video.get_elapsed_time}}</p>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
 {% endblock %}

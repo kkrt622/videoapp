@@ -36,4 +36,5 @@ urlpatterns = [
     ),
     path("login", views.LoginView.as_view(), name="login"),
     path("video_upload", views.VideoUploadView.as_view(), name="video_upload"),
+    path("video_play/<int:pk>", views.PlayVideoView.as_view(), name="video_play"),
 ]

@@ -152,6 +152,19 @@ class PasswordChangeForm(forms.Form):
 
 
 class VideoUploadForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["title"].widget.attrs["class"] = "title-form"
+        self.fields["title"].widget.attrs["placeholder"] = "タイトルを入力"
+        self.fields["title"].widget.attrs["onkeyup"] = "ShowTitleLength(value);"
+        self.fields["title"].widget.attrs["rows"] = "2"
+        self.fields["description"].widget.attrs["class"] = "description-form"
+        self.fields["description"].widget.attrs["placeholder"] = "詳細文を入力"
+        self.fields["description"].widget.attrs[
+            "onkeyup"
+        ] = "ShowDescriptionLength(value);"
+        self.fields["video"].widget.attrs["class"] = "video-form"
+
     class Meta:
         model = Video
         fields = ("title", "description", "thumbnail", "video")

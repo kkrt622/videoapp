@@ -1,0 +1,65 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block extra_style %}
+<link rel="stylesheet" href="{% static 'main/css/video_play.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="video-player-container">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <video id="video" controls width='100%'></video>
+    <script>
+        var video = document.getElementById('video');
+        var videoSrc = 'https://[動画の配置先]/sample.m3u8';
+        if (Hls.isSupported()) {
+            var hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+        }
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+        }
+    </script>
+    <div class="video-information-container">
+        <p class="video-title">{{video.title}}</p>
+        <div class="video-detail-wrapper">
+            <p class="video-views">{{video.views_count}}回視聴&emsp;</p>
+            <p class="uploaded-elapsed-time">{{video.get_elapsed_time}}&emsp;</p>
+            <p class="video-uploaded-at">{{video.uploaded_date|date:"Y/m/d"}}</p>
+        </div>
+        <a class="user-information-wrapper" href="">
+            <img src="{% static 'main/img/スクリーンショット 2022-12-31 20.34.16.png' %}">
+            <p class="video-creator">{{video.user.username}}</p>
+        </a>
+        <hr noshade size="1">
+        <div class="description-wrapper">
+            <p class="video-partial-description">{{video.description|truncatechars:200}}</p>
+            <p class="more-button">もっと見る...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    var viewCount = "{{video.views_count}}"
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const video = document.getElementById("video")
+        video.addEventListener("play", function (event) {
+            viewCount++;
+            const xhr = new XMLHttpRequest();
+            const queryString = new URLSearchParams({ "views": viewCount }).toString();
+            const url = window.location.href.replace(/\?.*$/, "");
+            const requestPath = url + "?" + queryString;
+            console.log(requestPath)
+            xhr.open("GET", requestPath);
+            xhr.responseType = "document";
+            xhr.send();
+        }, { once: true })
+    })
+</script>
+{% endblock %}

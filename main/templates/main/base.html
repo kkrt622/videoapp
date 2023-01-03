@@ -16,18 +16,16 @@
     <header class="header">
         <div class="header__item">
             <div class="header__title">
-                {% block header_title %}Video App{% endblock %}
+                {% block header_title %}<a href="{% url 'home' %}">Video App</a>{% endblock %}
             </div>
-            <a href="" class="header__link">
+            <a href="{% url 'video_upload' %}" class="header__link">
                 <div class="header__icon"><i class="fas fa-user"></i></div>
             </a>
         </div>
     </header>
     {% endblock %}
-    <div class="main">
-        {% block content %}
-        {% endblock %}
-    </div>
+    {% block content %}
+    {% endblock %}
     {% block footer %}
     <footer class="footer">
         <div class="footer__item">

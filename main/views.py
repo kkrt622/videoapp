@@ -6,12 +6,12 @@ from django.contrib.auth.views import (
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model, login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, FormView
+from django.views.generic import TemplateView, FormView, DetailView
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.conf import settings
 from django.urls import reverse_lazy
-from .models import AuthenticationCode
+from .models import AuthenticationCode, Video
 import random
 from .forms import (
     EmailAuthenticationForm,
@@ -29,6 +29,12 @@ User = get_user_model()
 
 class HomeView(LoginRequiredMixin, TemplateView):
     template_name = "main/home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        video = Video.objects.all().order_by("-uploaded_date")
+        context["videos"] = video
+        return context
 
 
 def generate_random_code(email):
@@ -139,7 +145,6 @@ class PasswordResetView(FormView):
         context = super().get_context_data(**kwargs)
         context["email"] = form.cleaned_data["email"]
         email = self.request.POST.get("email")
-        print(email)
 
         # メール送信
         message_template = get_template("mail_text/password_reset.txt")
@@ -210,4 +215,21 @@ class VideoUploadView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy("home")
 
     def form_valid(self, form, **kwargs):
-        return super().form_valid(form, **kwargs)
+        data = form.cleaned_data
+        obj = Video(**data)
+        obj.user = self.request.user
+        obj.save()
+        return super().form_valid(form)
+
+
+class PlayVideoView(LoginRequiredMixin, DetailView):
+    template_name = "main/video_play.html"
+    model = Video
+
+    def get_queryset(self, **kwargs):
+        queryset = super().get_queryset(**kwargs)
+        queryset = queryset.filter(id=self.kwargs["pk"])
+        if "views" in self.request.GET:
+            views = self.request.GET.get("views")
+            queryset.update(views_count=views)
+        return queryset
