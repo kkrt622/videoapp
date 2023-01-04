@@ -1,0 +1,51 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block extra_style %}
+<link rel="stylesheet" href="{% static 'main/css/video_search.css' %}">
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="video-container">
+
+    <form method="get" action="#" class="search-container">
+        <input class="search-form" type="text" placeholder="動画を検索">
+        <div class="button-container">
+            <button class="search-button active">新着の動画</button>
+            <button class="search-button">人気の動画</button>
+        </div>
+    </form>
+    <div class="video-list-container">
+        {% for video in object_list %}
+        <a class="video-information-container" href="{% url 'video_play' video.id %}">
+            <div class="video-thumbnail-wrapper">
+                <img src="{% static 'main/img/スクリーンショット 2022-12-31 20.34.16.png' %}">
+            </div>
+            <div class="video-detail-container">
+                <div class="icon-wrapper">
+                    <img src="{% static 'main/img/スクリーンショット 2022-12-31 20.34.16.png' %}">
+                </div>
+                <div class="text-wrapper">
+                    <p class="video-title">{{video.title}}</p>
+                    <div class="video-detail-wrapper">
+                        <p class="video-creator">{{video.user.username}}</p>
+                        <span>・</span>
+                        <p class="video-views">{{video.views_count}}回視聴</p>
+                        <span>・</span>
+                        <p class="video-uploaded-at">{{video.get_elapsed_time}}</p>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{% static 'main/js/video_search.js' %}"></script>
+{% endblock %}

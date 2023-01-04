@@ -6,7 +6,7 @@ from django.contrib.auth.views import (
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model, login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, FormView, DetailView
+from django.views.generic import TemplateView, FormView, DetailView, ListView
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.conf import settings
@@ -232,4 +232,23 @@ class PlayVideoView(LoginRequiredMixin, DetailView):
         if "views" in self.request.GET:
             views = self.request.GET.get("views")
             queryset.update(views_count=views)
+        return queryset
+
+
+class SearchVideoView(LoginRequiredMixin, ListView):
+    template_name = "main/video_search.html"
+    model = Video
+
+    def get_queryset(self, **kwargs):
+        queryset = super().get_queryset(**kwargs)
+        if "keyword" in self.request.GET:
+            keyword = self.request.GET.get("keyword")
+            if keyword:
+                keywords = keyword.split()
+                for k in keywords:
+                    queryset = queryset.filter(title__icontains=k)
+        if self.request.GET.get("btnType") == "favorite":
+            queryset = queryset.order_by("-views_count")[:2]
+        else:
+            queryset = queryset.order_by("-uploaded_date")
         return queryset

@@ -18,12 +18,13 @@ h1 {
 
 .header {
     box-sizing: border-box;
-    position: sticky;
+    position: fixed;
     left: 0;
     width: 100%;
     height: 64px;
     background-color: rgba(249, 249, 249, 0.79);
     padding: 0 4vw;
+    z-index: 1;
 }
 
 .header__item {
@@ -42,6 +43,10 @@ h1 {
 
 .header__icon {
     line-height: 64px;
+}
+
+.main {
+    padding-top: 64px;
 }
 
 .footer {
