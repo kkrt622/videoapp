@@ -6,6 +6,16 @@
 {% endblock %}
 
 {% block header %}
+<header class="header">
+    <div class="header__item">
+        <a href="{% url 'home' %}" class="header__link">
+            <i class="fas fa-arrow-left fa-2x"></i>
+        </a>
+        <div class="header__title">
+            {% block header_title %}詳細を追加{% endblock %}
+        </div>
+    </div>
+</header>
 {% endblock %}
 
 {% block content %}
@@ -16,7 +26,11 @@
         <div class="upload-form-error">{{form.email.errors}}</div>
         {% endif %}
         <div class="thumbnail-form-field">
-            {{ form.thumbnail }}
+            <img class="thumbnail-preview" src="{% static 'main/img/スクリーンショット 2022-12-31 20.34.16.png' %}">
+            <label>
+                <i class="far fa-images"></i>
+                {{ form.thumbnail }}
+            </label>
         </div>
         <div class="title-form-field">
             <div class="title-form-lead">

@@ -1,6 +1,5 @@
 .search-container {
     box-sizing: border-box;
-    padding: 0 4vw;
     padding-top: 1rem;
 }
 
@@ -59,7 +58,6 @@
 }
 
 .video-detail-container {
-    padding: 0 4vw;
     display: flex;
     margin-top: 0.75rem;
 }

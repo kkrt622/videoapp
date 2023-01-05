@@ -1,9 +1,42 @@
-.upload-form-container {
-    padding: 0 4vw;
+.header__title {
+    margin: 0 auto;
 }
+
+.upload-form-container {
+    padding-top: 64px;
+}
+
+/* .thumbnail-form {
+    display: none;
+} */
 
 .title-form-field {
     margin-top: 0.75rem;
+}
+
+.thumbnail-preview {
+    width: 100%;
+}
+
+.thumbnail-form-field {
+    position: relative;
+}
+
+.thumbnail-form-field i {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 3px;
+    border-radius: 4px;
+}
+
+.thumbnail-form {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
 }
 
 .title-form {

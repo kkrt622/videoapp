@@ -19,7 +19,7 @@
                 {% block header_title %}<a href="{% url 'home' %}">Video App</a>{% endblock %}
             </div>
             <a href="{% url 'video_upload' %}" class="header__link">
-                <div class="header__icon"><i class="fas fa-plus-circle"></i></div>
+                <i class="far fa-times-circle fa-2x upload-icon"></i>
             </a>
         </div>
     </header>
@@ -28,6 +28,7 @@
         {% block content %}
         {% endblock %}
     </div>
+
     {% block footer %}
     <footer class="footer">
         <div class="footer__item">

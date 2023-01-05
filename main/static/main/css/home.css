@@ -1,3 +1,7 @@
+.video-container {
+    padding-top: 64px;
+}
+
 .video-information-container {
     display: block;
     margin-top: 0.75rem;

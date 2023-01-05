@@ -55,7 +55,6 @@
             const queryString = new URLSearchParams({ "views": viewCount }).toString();
             const url = window.location.href.replace(/\?.*$/, "");
             const requestPath = url + "?" + queryString;
-            console.log(requestPath)
             xhr.open("GET", requestPath);
             xhr.responseType = "document";
             xhr.send();

@@ -164,6 +164,7 @@ class VideoUploadForm(forms.ModelForm):
             "onkeyup"
         ] = "ShowDescriptionLength(value);"
         self.fields["video"].widget.attrs["class"] = "video-form"
+        self.fields["thumbnail"].widget.attrs["class"] = "thumbnail-form"
 
     class Meta:
         model = Video

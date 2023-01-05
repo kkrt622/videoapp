@@ -1,5 +1,8 @@
+.video-player-container {
+    padding-top: 64px;
+}
+
 .video-information-container {
-    padding: 0 4vw;
     margin-top: 0.75rem;
 }
 
