@@ -32,6 +32,10 @@
     border: 1px solid rgba(51, 51, 51, 0.1);
 }
 
+.video-list-container a:nth-last-of-type(1) {
+    padding-bottom: 64px;
+}
+
 .video-information-container {
     display: block;
     margin-top: 0.75rem;

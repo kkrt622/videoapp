@@ -33,6 +33,10 @@
     margin-top: 0.75rem;
 }
 
+.video-container a:nth-last-of-type(1) {
+    padding-bottom: 64px;
+}
+
 .icon-wrapper {
     margin-right: 0.75rem;
 }
