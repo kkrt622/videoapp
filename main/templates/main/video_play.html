@@ -34,7 +34,7 @@
         </a>
         <hr noshade size="1">
         <div class="description-wrapper">
-            <p class="video-partial-description">{{video.description|truncatechars:200}}</p>
+            <p class="video-description">{{video.description}}</p>
             <p class="more-button">もっと見る...</p>
         </div>
     </div>
@@ -48,6 +48,7 @@
     const params = url.searchParams;
 
     document.addEventListener('DOMContentLoaded', function () {
+        // 視聴回数カウント
         const video = document.getElementById("video")
         video.addEventListener("play", function (event) {
             viewCount++;
@@ -59,6 +60,22 @@
             xhr.responseType = "document";
             xhr.send();
         }, { once: true })
+
+        // 「もっと見るボタン」
+        const moreBtn = document.querySelector('.more-button');
+        const videoDescription = document.querySelector('.video-description');
+        const videoDescriptionStr = videoDescription.textContent
+        const videoDescriptionLength = videoDescriptionStr.length;
+        if (videoDescriptionLength > 200) {
+            videoDescription.textContent = videoDescriptionStr.substring(0, 200) + '...'
+            moreBtn.addEventListener('click', function (ev) {
+                videoDescription.textContent = '{{video.description}}'
+                moreBtn.style.display = 'none'
+            })
+        }
+        else {
+            moreBtn.style.display = 'none'
+        }
     })
 </script>
 {% endblock %}
