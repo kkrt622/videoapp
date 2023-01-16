@@ -32,25 +32,29 @@
                 {{ form.thumbnail }}
             </label>
         </div>
-        <div class="title-form-field">
-            <div class="title-form-lead">
-                <label class="title-form-label" for="{{form.title.label}}">タイトル</label>
-                <p id="title-form-length">0/50</p>
+        <div class="inner-block">
+            <div class="title-form-field">
+                <div class="title-form-lead">
+                    <label class="title-form-label" for="{{form.title.label}}">タイトル</label>
+                    <p id="title-form-length">0/50</p>
+                </div>
+                {{ form.title }}
             </div>
-            {{ form.title }}
-        </div>
-        <hr>
-        <div class="description-form-field">
-            <div class="description-form-lead">
-                <label for="{{form.description.label}}">詳細文</label>
-                <p id="description-form-length">0/500</p>
+            <hr>
+            <div class="description-form-field">
+                <div class="description-form-lead">
+                    <label for="{{form.description.label}}">詳細文</label>
+                    <p id="description-form-length">0/500</p>
+                </div>
+                {{ form.description }}
             </div>
-            {{ form.description }}
+            <div class="video-form-field">
+                <label class="video-upload-btn">
+                    {{ form.video }}動画を選択
+                </label>
+            </div>
+            <button type="submit" class="upload-form-btn">動画をアップロード</button>
         </div>
-        <div class="video-form-field">
-            <label class="video-upload-btn">{{ form.video }}</label>
-        </div>
-        <button type="submit" class="upload-form-btn">動画をアップロード</button>
     </form>
 </div>
 {% endblock %}

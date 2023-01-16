@@ -24,6 +24,8 @@ from .forms import (
     VideoUploadForm,
 )
 
+import uuid
+
 User = get_user_model()
 
 
@@ -45,6 +47,34 @@ def generate_random_code(email):
     return random_number
 
 
+def registration_send_mail(email):
+    message_template = get_template("mail_text/registration.txt")
+    random_code = generate_random_code(email)
+    context = {
+        "email": email,
+        "random_code": random_code,
+    }
+    subject = "Video Appの本登録について"
+    message = message_template.render(context)
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = ([email],)
+    send_mail(subject, message, from_email, recipient_list)
+
+
+def password_reset_send_mail(email):
+    message_template = get_template("mail_text/password_reset.txt")
+    random_code = generate_random_code(email)
+    context = {
+        "email": email,
+        "random_code": random_code,
+    }
+    subject = "パスワード再設定について"
+    message = message_template.render(context)
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = ([email],)
+    send_mail(subject, message, from_email, recipient_list)
+
+
 class LoginView(LoginView):
     template_name = "main/login.html"
     form_class = EmailAuthenticationForm
@@ -62,21 +92,11 @@ class TempRegistrationView(FormView):
         email = self.request.POST.get("email")
 
         # メール送信
-        message_template = get_template("mail_text/registration.txt")
-        random_code = generate_random_code(email)
-        context = {
-            "email": email,
-            "random_code": random_code,
-        }
-        subject = "Video Appの本登録について"
-        message = message_template.render(context)
-        from_email = settings.DEFAULT_FROM_EMAIL
-        recipient_list = ([email],)
-        send_mail(subject, message, from_email, recipient_list)
+        registration_send_mail(email)
 
         # 仮登録処理
         user, created = User.objects.get_or_create(
-            email=email, defaults={"is_registered": False}
+            username=email, email=email, defaults={"is_registered": False}
         )
         return redirect("temp_registration_done", user.id)
 
@@ -98,6 +118,10 @@ class TempRegistrationDoneView(FormView):
         return render(self.request, "main/temp_registration_done.html")
 
     def get_context_data(self, **kwargs):
+        if "email" in self.request.GET:
+            email = self.request.GET.get("email")
+            registration_send_mail(email)
+
         context = super().get_context_data(**kwargs)
         user_id = self.kwargs["user_id"]
         user = get_object_or_404(User, pk=user_id)
@@ -147,17 +171,7 @@ class PasswordResetView(FormView):
         email = self.request.POST.get("email")
 
         # メール送信
-        message_template = get_template("mail_text/password_reset.txt")
-        random_code = generate_random_code(email)
-        context = {
-            "email": email,
-            "random_code": random_code,
-        }
-        subject = "パスワードの再設定について"
-        message = message_template.render(context)
-        from_email = settings.DEFAULT_FROM_EMAIL
-        recipient_list = ([email],)
-        send_mail(subject, message, from_email, recipient_list)
+        password_reset_send_mail(email)
 
         user = get_object_or_404(User, email=email)
         return redirect("password_reset_confirmation", user.id)
@@ -180,6 +194,11 @@ class PasswordResetConfirmationView(FormView):
         return render(self.request, "main/password_reset_confirmation.html")
 
     def get_context_data(self, **kwargs):
+        # メール再送信
+        if "email" in self.request.GET:
+            email = self.request.GET.get("email")
+            password_reset_send_mail(email)
+
         context = super().get_context_data(**kwargs)
         user_id = self.kwargs["user_id"]
         user = get_object_or_404(User, pk=user_id)
@@ -233,6 +252,10 @@ class PlayVideoView(LoginRequiredMixin, DetailView):
             views = self.request.GET.get("views")
             queryset.update(views_count=views)
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 class SearchVideoView(LoginRequiredMixin, ListView):

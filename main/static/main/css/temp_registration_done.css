@@ -8,6 +8,7 @@ span {
 
 .registration-form-container {
     margin-top: 50px;
+    padding: 0 4vw;
 }
 
 .form {
@@ -44,7 +45,7 @@ span {
     display: inline;
 }
 
-.regenerate-code-form {
+.regenerate-code-btn {
     border: none;
     outline: none;
     background: transparent;

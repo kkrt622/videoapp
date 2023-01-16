@@ -4,6 +4,7 @@
 
 .video-information-container {
     margin-top: 0.75rem;
+    padding: 0 4vw 64px 4vw;
 }
 
 .user-information-wrapper {
@@ -47,4 +48,8 @@ hr {
     bottom: 0;
     right: 0;
     z-index: 1;
+}
+
+.more-button:hover {
+    opacity: 0.6;
 }
