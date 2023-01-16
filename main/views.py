@@ -20,7 +20,16 @@ from .forms import (
     PasswordResetForm,
     PasswordResetConfirmationForm,
     PasswordChangeForm,
+    ProfileChangeForm,
 )
+
+from django.db.models import Q
+
+from django.db.models import Count 
+
+from django.contrib.auth.decorators import login_required
+
+from .models import Video
 
 User = get_user_model()
 
@@ -199,3 +208,101 @@ class PasswordChangeView(generic.FormView):
         user = get_object_or_404(User, pk=user_id)
         context["user"] = user
         return context
+
+def following(request):
+    following = get_object_or_404(User, id=request.user.id).follow.all()
+    context = {"following": following}
+    return render(request, "main/following.html", context)
+
+def my_account(request):
+    account = User.objects.annotate(
+        follower_count = Count("followed")
+    ).get(id = request.user.id)
+
+    videos = Video.objects.filter(
+    Q(user = account)
+    ).all()
+    video_count =videos.count()
+
+    # プロフィール編集の処理
+    if request.method == "GET":
+        form = ProfileChangeForm(instance=request.user)
+    elif request.method == "POST":
+        form = ProfileChangeForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            # 保存後、完了ページに遷移します
+            return redirect("my_account")
+
+    context = {
+        "account": account,
+        "form": form,
+        "videos": videos,
+        "video_count": video_count,
+    }
+    return render(request, "main/account.html", context)
+
+def others_account(request, user_id):
+    others_account = User.objects.annotate(
+        follower_count = Count("followed")
+    ).get(id = user_id)
+
+    videos = Video.objects.filter(
+        Q(user = others_account)
+    ).all()
+    video_count =videos.count()
+
+    my_account = User.objects.annotate(
+    follower_count = Count("followed")
+    ).get(id = request.user.id)
+    # 自分がフォロー中の相手を取得
+    followers = my_account.follow.all()
+    # プロフィール表示をしようとしている相手をフォローしているかのチェック
+    for follower in followers:
+        if follower.id == others_account.id :
+            follow = True
+            break
+        else:
+            follow = False
+    context = {
+        "account": others_account,
+        "videos": videos,
+        "video_count": video_count,
+        "follow" : follow
+    }
+    return render(request, "main/account.html", context)
+
+def follow(request, user_id):
+    follow = User.objects.get(id = user_id)
+    request.user.follow.add(follow)
+    request.user.save()
+    return redirect("others_account", user_id)
+    
+def unfollow(request, user_id):
+    follow = User.objects.get(id = user_id)
+    request.user.follow.remove(follow)
+    request.user.save()
+    return redirect("others_account", user_id)
+
+def settings(request):
+    return render(request, "main/settings.html")
+
+def terms(request):
+    return render(request, "main/terms.html")
+
+def policy(request):
+    return render(request, "main/policy.html")
+
+@login_required
+def edit_profile(request):
+    if request.method == "GET":
+        # instance を指定することで、指定したインスタンスのデータにアクセスできます
+        form = ProfileChangeForm(instance=request.user)
+    elif request.method == "POST":
+        form = ProfileChangeForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            # 保存後、完了ページに遷移します
+            return redirect("my_account")
+    context = {"form": form}
+    return render(request, "main/edit_profile.html", context)

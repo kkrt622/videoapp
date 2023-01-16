@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>動画共有アプリ</title>
     <link rel="stylesheet" href="{% static 'main/css/base.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
     {% block extra_style %}{% endblock %}
 </head>
 
@@ -15,7 +15,10 @@
     {% block header %}
     <header class="header">
         <div class="header__title">
-            {% block header_title %}{% endblock %}
+            {% block header_title %}
+            <h1>Video App</h1>
+            <i class="fa-solid fa-plus"></i>
+            {% endblock %}
         </div>
     </header>
     {% endblock %}
@@ -38,13 +41,13 @@
             </a>
         </div>
         <div class="footer__item">
-            <a href="" class="footer__link">
+            <a href="{% url 'following' %}" class="footer__link">
                 <div class="footer__icon"><i class="fas fa-user-friends"></i></div>
                 <div class="footer__label">フォロー中</div>
             </a>
         </div>
         <div class="footer__item">
-            <a href="" class="footer__link">
+            <a href="{% url 'my_account' %}" class="footer__link">
                 <div class="footer__icon"><i class="fas fa-user"></i></div>
                 <div class="footer__label">アカウント</div>
             </a>
