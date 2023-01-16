@@ -6,10 +6,6 @@
     padding-top: 64px;
 }
 
-.upload-form {
-    padding-bottom: 64px;
-}
-
 .title-form-field {
     margin-top: 0.75rem;
 }
@@ -47,6 +43,10 @@
     top: 0;
     left: 0;
     display: none;
+}
+
+.inner-block {
+    padding: 0 4vw;
 }
 
 .title-form {
