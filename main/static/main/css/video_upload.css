@@ -6,6 +6,10 @@
     padding-top: 64px;
 }
 
+.upload-form {
+    padding-bottom: 64px;
+}
+
 .title-form-field {
     margin-top: 0.75rem;
 }
@@ -108,4 +112,15 @@
     color: white;
     border-radius: 100vh;
     margin-bottom: 30px;
+}
+
+.video-upload-btn {
+    padding: 10px 40px;
+    color: #ffffff;
+    background-color: #2B8F38;
+    cursor: pointer;
+}
+
+.video-form {
+    display: none;
 }

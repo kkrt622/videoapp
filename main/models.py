@@ -3,6 +3,7 @@ from django.db import models
 from datetime import timedelta
 from django.utils import timezone
 import os
+import uuid
 
 PLAY_SPEED_CHOICE = (
     ("slow", "スロー"),
@@ -37,13 +38,17 @@ class AuthenticationCode(models.Model):
         verbose_name_plural = "認証コード"
 
 
+def video_directory_path(instance, filename):
+    return "uploaded_video/{}.{}".format(str(uuid.uuid4()), filename.split(".")[-1])
+
+
 class Video(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.TextField("タイトル", max_length=50)
     description = models.TextField("説明", max_length=500)
     thumbnail = models.ImageField("サムネイル", upload_to="thumbnail/")
     uploaded_date = models.DateTimeField("動画投稿時刻", auto_now_add=True)
-    video = models.FileField("ビデオファイル", upload_to="uploaded_video/")
+    video = models.FileField("ビデオファイル", upload_to=video_directory_path)
     views_count = models.IntegerField("視聴回数", default=0)
 
     class Meta:

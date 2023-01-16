@@ -24,6 +24,8 @@ from .forms import (
     VideoUploadForm,
 )
 
+import uuid
+
 User = get_user_model()
 
 
@@ -250,6 +252,10 @@ class PlayVideoView(LoginRequiredMixin, DetailView):
             views = self.request.GET.get("views")
             queryset.update(views_count=views)
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 class SearchVideoView(LoginRequiredMixin, ListView):

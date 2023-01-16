@@ -49,3 +49,7 @@ hr {
     right: 0;
     z-index: 1;
 }
+
+.more-button:hover {
+    opacity: 0.6;
+}

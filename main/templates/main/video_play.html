@@ -9,9 +9,13 @@
 <div class="video-player-container">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <video id="video" controls width='100%'></video>
+
+    <!-- 動画の配信 -->
     <script>
         var video = document.getElementById('video');
-        var videoSrc = 'https://[動画の配置先]/sample.m3u8';
+        var fileName = '{{video.file_name}}'
+        var playList = fileName + "_converted.m3u8"
+        var videoSrc = 'https://dm6lwimws6hfo.cloudfront.net/' + fileName + '/' + playList;
         if (Hls.isSupported()) {
             var hls = new Hls();
             hls.loadSource(videoSrc);
@@ -21,6 +25,7 @@
             video.src = videoSrc;
         }
     </script>
+
     <div class="video-information-container">
         <p class="video-title">{{video.title}}</p>
         <div class="video-detail-wrapper">
