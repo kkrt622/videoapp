@@ -1,0 +1,454 @@
+.account {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.account__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-top: 24px;
+}
+
+.account-username {
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 30px;
+    margin: 2px 0;
+    word-wrap: break-word;
+    width: 70%;
+    text-align: center;
+}
+
+.account-detail {
+    display: flex;
+}
+
+.account-detail p {
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.4px;
+    margin: 2px 0;
+}
+
+.account-profile {
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+    letter-spacing: 0.4px;
+    margin-top: 4px;
+    width: 85%;
+    word-wrap: break-word;
+
+}
+
+.account-settings-btns {
+    margin: 10px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 85%;
+}
+
+.account-edit-profile-btn {
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 19px;
+    letter-spacing: 1.25px;
+    color: #2B8F38;
+    border: 1px solid #2B8F38;
+    padding: 8.5px 70px;
+    border-radius: 19px;
+}
+
+.account-settings-btn {
+    padding-left: 10px;
+}
+
+.account-follow-btns {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+    position: relative;
+}
+
+.account-follow-btns a {
+    width: 50%;
+    text-align: center;
+}
+
+.account-following-btn {
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 19px;
+    letter-spacing: 1.25px;
+    color: #2B8F38;
+    border: 1px solid #2B8F38;
+    padding: 8.5px 80px;
+    border-radius: 19px;
+}
+
+.account-follow-btn {
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 19px;
+    letter-spacing: 1.25px;
+    color: #FFFFFF;
+    border: 1px solid #2B8F38;
+    background-color: #2B8F38;
+    padding: 8.5px 80px;
+    border-radius: 19px;
+}
+
+.account-video-btns {
+    display: flex;
+    justify-content: flex-start;
+    width: 90%;
+    margin-top: 20px;
+}
+
+.account-video-btn-newest {
+    margin-right: 10px;
+}
+
+.account-video-btn-newest, 
+.account-video-btn-popular {
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 19px;
+    letter-spacing: 1.25px;
+    padding: 8.5px 12px;
+    border-radius: 19px;
+
+    color: rgba(0, 0, 0, 0.87);
+    border: 1px solid rgba(0, 0, 0, 0.87);
+    background-color: #FFFFFF;
+}
+
+/* ラジオボタン非表示 */
+input[type=radio].account-video-btn{
+        display: none;
+}
+
+.selected {
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF;
+    background-color: rgba(0, 0, 0, 0.87);;
+}
+
+/* プロフィール編集のCSS */
+
+.edit-profile {
+    background-color: #FFFFFF;
+    position: absolute;
+    top: 0;
+    opacity: 0;
+    height: 0;
+    transform: translateY(100%);
+    transition: transform 200ms;
+    z-index: -1;
+}
+
+.edit-profile-title-container {
+    display: flex;
+    align-items: center;
+    background: rgba(249, 249, 249, 0.79);
+}
+
+.edit-profile-title-container i {
+    width: 10%;
+    text-align: center;
+}
+
+.edit-profile-title-container h1 {
+    width: 70%;
+    text-align: initial;
+}
+
+.edit-profile-title-container button {
+    font-family: 'Noto Sans JP';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 19px;
+    letter-spacing: 1.25px;
+    color: #2B8F38;
+    border: none;
+    background: transparent;
+    justify-self: flex-end;
+    width: 20%;
+}
+
+.edit-icon {
+    position: relative;
+    height: 90px;
+    display: flex;
+    align-items: center;
+}
+
+#id_icon {
+    /* 写真のプレビューが見れるように透過 */
+    opacity: 0;
+    /* フォームが触れられるように調整 */
+    z-index: 1;
+    /* 円形に */
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    /* プレビューと被さるように位置を調整 */
+    position: absolute;
+    top: 24px;
+    left: 12px;
+}
+
+#preview {
+    /* .account__iconで指定されているmarginをリセット */
+    margin: 0;
+    opacity: 0.5;
+    /* フォームと被さるように位置を調整 */
+    position: absolute;
+    top: 24px;
+    left: 12px;
+}
+
+.edit-icon i {
+    position: relative;
+    top: 7px;
+    left: 29px;
+    font-size: 24px;
+    color: #FFFFFF;
+}
+
+#file-upload-button {
+    color: #2B8F38;
+    border: none;
+}
+
+.edit-username-container,
+.edit-profile-contaier {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    font-family: 'Noto Sans JP';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.4px;
+}
+
+.edit-username-text, 
+.edit-profile-text {
+    display: flex;
+    align-items: center;
+}
+
+.required {
+    padding-left: 4px;
+    font-family: 'Noto Sans JP';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 16px;
+    letter-spacing: 0.4px;
+    color: #CD241B;
+}
+
+:focus {
+    outline: none;
+}
+
+#id_username {
+    border: none;
+    width: 100%;
+    padding: 0 12px 24px;
+    box-sizing: border-box;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+
+    font-family: 'Noto Sans JP';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 28px;
+    letter-spacing: 0.15px;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+#id_profile {
+    border: none;
+    width: 100%;
+    padding: 0 12px;
+    box-sizing: border-box;
+
+    font-family: 'Noto Sans JP';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 19px;
+    letter-spacing: 0.25px;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+/* 設定画面のCSS */
+
+.settings {
+    display: flex;
+    flex-direction: column;
+    background-color: #FFFFFF;
+    position: absolute;
+    top: 0;
+    opacity: 0;
+    height: 0;
+    transform: translateY(100%);
+    transition: transform 200ms;
+    z-index: -1;
+    box-sizing: border-box;
+}
+
+.settings-title-container {
+    display: flex;
+    align-items: center;
+    background: rgba(249, 249, 249, 0.79);
+}
+
+.settings-title-container i {
+    width: 10%;
+    text-align: center;
+}
+
+.settings-title-container h1 {
+    width: 70%;
+    text-align: initial;
+}
+
+.settings-container {
+    padding: 0 12px;
+}
+
+.settings-container h2 {
+    font-family: 'Noto Sans JP';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 10px;
+    line-height: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #2B8F38;
+}
+
+.video-speed, 
+.email-change {
+    display: flex;
+    align-items: center;
+}
+
+.video-speed i,
+.video-quality i,
+.email-change i,
+.password-change i,
+.feedback i {
+    width: 10%;
+    text-align: center;
+}
+
+
+.video-speed-text,
+.video-quality-text,
+.email-change-text,
+.password-change-text,
+.feedback-text {
+    display: flex;
+    justify-content: space-between;
+    width: 85%;
+}
+
+.video-quality,
+.password-change,
+.feedback {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.rules {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.rules a {
+    font-family: 'Noto Sans JP';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 19px;
+    letter-spacing: 0.25px;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.logout {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.logout a {
+    font-family: 'Noto Sans JP';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 19px;
+    letter-spacing: 1.25px;
+    color: #2B8F38;
+}
+.account-delete {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.account-delete-text,
+.account-delete-link {
+    font-family: 'Noto Sans JP';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 19px;
+    letter-spacing: 0.25px;
+}
+
+.account-delete-text {
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.account-delete-link {
+    color: #2B8F38;
+    margin-left: 10px;
+}
+
+/* JS関連のCSS */
+
+.page-visible {
+    height: 100%;
+    width: 100%;
+    opacity: 1;
+    transform: translateY(0);
+    z-index: 1;
+}
+
+/* .btn-visible {
+    opacity: 1;
+    z-index: 1;
+} */

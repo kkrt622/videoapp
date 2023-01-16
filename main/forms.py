@@ -149,3 +149,10 @@ class PasswordChangeForm(forms.Form):
             raise ValidationError("6文字以上にしてください")
         if new_password1 != new_password2:
             raise ValidationError("パスワードが一致しません")
+
+class ProfileChangeForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("icon", "username", "profile")
+        labels = {"username": "ユーザー名", "profile": "紹介文",}
+        widgets = {"icon":forms.FileInput(attrs={"onchange":"previewImage(this);"})}

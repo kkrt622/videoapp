@@ -1,0 +1,225 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block extra_style %}
+<link rel="stylesheet" href="{% static 'main/css/account.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="account">
+    <img src="{% if account.icon %}{{ account.icon.url }}{% else %}{% static 'main/img/default-icon.png' %}{% endif %}" class="account__icon">
+    <h2 class="account-username">
+        {{ account.username }}
+    </h2>
+    <div class="account-detail">
+        <div class="account-detail-video-count">
+            <p>{{ video_count }} 本の動画</p>
+        </div>
+        <p>・</p>
+        <div class="account-detail-following">
+            <p>{{ account.follower_count }} 人のフォロワー</p>
+        </div>
+    </div>
+    <div class="account-profile">
+        {{ account.profile }}
+    </div>
+    {% if account.id == request.user.id %}
+        <div class="account-settings-btns">
+            <div class="account-edit-profile-btn">プロフィールを編集</div>
+            <div class="account-settings-btn"><i class="fa-solid fa-gear"></i></div>
+        </div>
+    {% else %}
+        <div class="account-follow-btns">
+            {% if follow == True %}
+                <a href="{% url 'unfollow' account.id %}" class="account-following-btn btn-visible">フォロー中</a>
+            {% else %}
+                <a href="{% url 'follow' account.id %}" class="account-follow-btn">フォロー</a>
+            {% endif %}
+        </div>
+    {% endif %}
+    <div class="account-video-btns">
+        <label class="account-video-btn-newest selected">
+            <input class="account-video-btn" type="radio" name="video-switch" value="video-newest" checked="checked" >新着の動画
+        </label>
+        <label class="account-video-btn-popular">
+            <input class="account-video-btn" type="radio" name="video-switch" value="video-popular" >人気の動画
+        </label>
+    </div>
+</div>
+
+<!-- プロフィール編集画面 -->
+<div class="edit-profile">
+    <div class="edit-profile-title-container">
+        <i class="fa-solid fa-xmark edit-profile-close"></i>
+        <h1>プロフィールを編集</h1>
+        <button type="submit" form="edit-form">保存</button>
+    </div>
+    <form action="{% url 'edit_profile' %}" method="POST" id="edit-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <table class="edit-form-containers">
+            <div class="edit-icon">
+                {{ form.icon }}
+                <img id="preview"  class="account__icon" src="{% if account.icon %}{{ account.icon.url }}{% else %}{% static 'main/img/default-icon.png' %}{% endif %}">
+                <i class="fa-regular fa-image"></i>
+            </div>
+            <div class="edit-username-container">
+                <div class="edit-username-text">
+                    {{ form.username.label }}
+                    <p class="required">必須</p>
+                </div>
+                <p class="edit-username-counter"><span id="edit-username-count">0</span>/50</p>
+            </div>
+            {{ form.username }}
+            <div class="edit-profile-contaier">
+                <div class="edit-profile-text">
+                    {{ form.profile.label }}
+                </div>
+                <p class="edit-profile-counter"><span id="edit-profile-count">0</span>/500</p>
+            </div>
+            {{ form.profile }}
+        </table>
+    </form>
+</div>
+
+<!-- 設定画面 -->
+<div class="settings">
+    <div class="settings-title-container">
+        <i class="fa-solid fa-xmark settings-close"></i>
+        <h1>設定</h1>
+    </div>
+    <div class="settings-container">
+        <div class="video-settings">
+            <h2>動画再生の設定</h2>
+            <div class="video-speed">
+                <i class="fa-solid fa-play"></i>
+                <div class="video-speed-text">
+                    <p>再生速度</p>
+                    <p>標準</p>
+                </div>
+            </div>
+            <div class="video-quality">
+                <i class="fa-regular fa-image"></i>
+                <div class="video-quality-text">
+                    <p>画質</p>
+                    <p>1080p</p>
+                </div>
+            </div>
+        </div>
+        <div class="account-settings">
+            <h2>アカウントの設定</h2>
+            <div class="email-change">
+                <i class="fa-regular fa-envelope"></i>
+                <div class="email-change-text">
+                    <p>メールアドレスの変更</p>
+                </div>
+            </div>
+            <div class="password-change">
+                <i class="fa-solid fa-asterisk"></i>
+                <div class="password-change-text">
+                    <p>パスワードの変更</p>
+                </div>
+            </div>
+        </div>
+        <div class="feedback">
+            <i class="fa-regular fa-comment"></i>
+            <div class="feedback-text">
+                <p>フィードバックを送る</p>
+            </div>
+        </div>
+        <div class="others">
+            <div class="rules">
+                <a href="{% url 'terms' %}" class="terms">利用規約</a>
+                <p>・</p>
+                <a href="{% url 'policy' %}" class="policy">プライバシーポリシー</a>
+            </div>
+            <div class="logout">
+                <a href="" class="logout-link">ログアウト</a>
+            </div>
+            <div class="account-delete">
+                <p class="account-delete-text">アカウントの削除は</p>
+                <a href="" class="account-delete-link">こちら</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    // 動画表示ボタンの切り替え
+    var newest = document.querySelector(".account-video-btn-newest");
+    var popular = document.querySelector(".account-video-btn-popular");
+    newest.addEventListener("click", function() {
+        newest.classList.add("selected")
+        popular.classList.remove("selected")
+    });
+    popular.addEventListener("click", function() {
+        popular.classList.add("selected")
+        newest.classList.remove("selected")
+    });
+
+    // プロフィール編集の表示切り替え
+    var edit_target = document.querySelector('.edit-profile');
+    var edit_button = document.querySelector('.account-edit-profile-btn');
+    var edit_close = document.querySelector('.edit-profile-close');
+    edit_button.addEventListener('click', function() {
+        edit_target.classList.toggle('page-visible')
+    });
+    edit_close.addEventListener('click', function() {
+        edit_target.classList.toggle('page-visible')
+    });
+
+    // 設定の表示切り替え
+    var settings_target = document.querySelector('.settings');
+    var settings_button = document.querySelector('.account-settings-btn');
+    var settings_close = document.querySelector('.settings-close');
+    settings_button.addEventListener('click', function() {
+        settings_target.classList.toggle('page-visible')
+    });
+    settings_close.addEventListener('click', function() {
+        settings_target.classList.toggle('page-visible')
+    });
+
+    // 画像プレビュー機能の実装
+    function previewImage(obj){
+        var fileReader = new FileReader();
+        fileReader.onload = (function() {
+            document.getElementById('preview').src = fileReader.result;
+        });
+        fileReader.readAsDataURL(obj.files[0]);
+    }
+
+    // 文字数カウント機能
+    var username = document.getElementById("id_username");
+    var profile = document.getElementById("id_profile");
+    var username_count = document.getElementById("edit-username-count");
+    var profile_count = document.getElementById("edit-profile-count");
+    // 入力前文字数
+    username_count.textContent = username.value.length;
+    profile_count.textContent = profile.value.length;
+    // 入力時の文字数
+    username.addEventListener("keyup", function() {
+        username_count.textContent = username.value.length;
+    });
+    profile.addEventListener("keyup", function() {
+        profile_count.textContent = profile.value.length;
+    });
+
+    // フォローボタンの切り替え
+    // var following_btn = document.querySelector(".account-following-btn");
+    // var follow_btn = document.querySelector(".account-follow-btn");
+    // following_btn.addEventListener("click", function() {
+    //     following_btn.classList.toggle("btn-visible")
+    //     follow_btn.classList.toggle("btn-visible")
+    // });
+    // follow_btn.addEventListener("click", function() {
+    //     following_btn.classList.toggle("btn-visible")
+    //     follow_btn.classList.toggle("btn-visible")
+    // });
+
+</script>
+
+{% endblock %}
