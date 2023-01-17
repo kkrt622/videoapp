@@ -23,11 +23,11 @@
         {% for video in object_list %}
         <a class="video-information-container" href="{% url 'video_play' video.id %}">
             <div class="video-thumbnail-wrapper">
-                <img src="{% static 'main/img/スクリーンショット 2022-12-31 20.34.16.png' %}">
+                <img src="{% static 'main/img/sample.jpeg' %}">
             </div>
             <div class="video-detail-container">
                 <div class="icon-wrapper">
-                    <img src="{% static 'main/img/スクリーンショット 2022-12-31 20.34.16.png' %}">
+                    <img src="{% static 'main/img/sample.jpeg' %}">
                 </div>
                 <div class="text-wrapper">
                     <p class="video-title">{{video.title}}</p>
