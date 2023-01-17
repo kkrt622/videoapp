@@ -209,11 +209,13 @@ class PasswordChangeView(generic.FormView):
         context["user"] = user
         return context
 
+@login_required
 def following(request):
     following = get_object_or_404(User, id=request.user.id).follow.all()
     context = {"following": following}
     return render(request, "main/following.html", context)
 
+@login_required
 def my_account(request):
     account = User.objects.annotate(
         follower_count = Count("followed")
@@ -242,6 +244,7 @@ def my_account(request):
     }
     return render(request, "main/account.html", context)
 
+@login_required
 def others_account(request, user_id):
     others_account = User.objects.annotate(
         follower_count = Count("followed")
@@ -272,37 +275,26 @@ def others_account(request, user_id):
     }
     return render(request, "main/account.html", context)
 
+@login_required
 def follow(request, user_id):
     follow = User.objects.get(id = user_id)
     request.user.follow.add(follow)
     request.user.save()
     return redirect("others_account", user_id)
-    
+
+@login_required    
 def unfollow(request, user_id):
     follow = User.objects.get(id = user_id)
     request.user.follow.remove(follow)
     request.user.save()
     return redirect("others_account", user_id)
 
+@login_required
 def settings(request):
     return render(request, "main/settings.html")
 
 def terms(request):
     return render(request, "main/terms.html")
 
-def policy(request):
-    return render(request, "main/policy.html")
-
-@login_required
-def edit_profile(request):
-    if request.method == "GET":
-        # instance を指定することで、指定したインスタンスのデータにアクセスできます
-        form = ProfileChangeForm(instance=request.user)
-    elif request.method == "POST":
-        form = ProfileChangeForm(request.POST, request.FILES, instance=request.user)
-        if form.is_valid():
-            form.save()
-            # 保存後、完了ページに遷移します
-            return redirect("my_account")
-    context = {"form": form}
-    return render(request, "main/edit_profile.html", context)
+def privacy_policy(request):
+    return render(request, "main/privacy_policy.html")

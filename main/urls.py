@@ -40,8 +40,6 @@ urlpatterns = [
     path("others_account/<user_id>", views.others_account, name="others_account",),
     path("unfollow/<user_id>", views.unfollow, name="unfollow",),
     path("follow/<user_id>", views.follow, name="follow",),
-    path("settings", views.settings, name="settings",),
     path("terms", views.terms, name="terms",),
-    path("policy", views.policy, name="policy",),
-    path("edit_profile", views.edit_profile, name="edit_profile",),
+    path("privacy_policy", views.privacy_policy, name="privacy_policy",),
 ]

@@ -55,7 +55,7 @@
         <h1>プロフィールを編集</h1>
         <button type="submit" form="edit-form">保存</button>
     </div>
-    <form action="{% url 'edit_profile' %}" method="POST" id="edit-form" enctype="multipart/form-data">
+    <form action="{% url 'my_account' %}" method="POST" id="edit-form" enctype="multipart/form-data">
         {% csrf_token %}
         <table class="edit-form-containers">
             <div class="edit-icon">
@@ -131,7 +131,7 @@
             <div class="rules">
                 <a href="{% url 'terms' %}" class="terms">利用規約</a>
                 <p>・</p>
-                <a href="{% url 'policy' %}" class="policy">プライバシーポリシー</a>
+                <a href="{% url 'privacy_policy' %}" class="policy">プライバシーポリシー</a>
             </div>
             <div class="logout">
                 <a href="" class="logout-link">ログアウト</a>
