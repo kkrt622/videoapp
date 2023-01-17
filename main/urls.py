@@ -42,4 +42,15 @@ urlpatterns = [
     path("follow/<user_id>", views.follow, name="follow",),
     path("terms", views.terms, name="terms",),
     path("privacy_policy", views.privacy_policy, name="privacy_policy",),
+    path("logout/", views.LogoutView.as_view(), name="logout"),
+    path(
+        "account_delete/<int:pk>",
+        views.AccountDeleteView.as_view(),
+        name="account_delete",
+    ),
+    path(
+        "account_delete_done",
+        views.AccountDeleteDoneView.as_view(),
+        name="account_delete_done",
+    ),
 ]

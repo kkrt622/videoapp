@@ -372,6 +372,10 @@ input[type=radio].account-video-btn{
     width: 85%;
 }
 
+.password-change-text a {
+    margin: 16px 0;
+}
+
 .video-quality,
 .password-change,
 .feedback {

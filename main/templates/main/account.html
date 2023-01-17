@@ -117,7 +117,7 @@
             <div class="password-change">
                 <i class="fa-solid fa-asterisk"></i>
                 <div class="password-change-text">
-                    <p>パスワードの変更</p>
+                    <a href="{% url 'password_change' account.id %}">パスワードの変更</a>
                 </div>
             </div>
         </div>
@@ -134,11 +134,11 @@
                 <a href="{% url 'privacy_policy' %}" class="policy">プライバシーポリシー</a>
             </div>
             <div class="logout">
-                <a href="" class="logout-link">ログアウト</a>
+                <a href="{% url 'logout' %}" class="logout-link">ログアウト</a>
             </div>
             <div class="account-delete">
                 <p class="account-delete-text">アカウントの削除は</p>
-                <a href="" class="account-delete-link">こちら</a>
+                <a href="{% url 'account_delete' account.id %}" class="account-delete-link">こちら</a>
             </div>
         </div>
     </div>

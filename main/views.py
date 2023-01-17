@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import (
     LoginView,
     PasswordChangeView,
+    LogoutView,
 )
 from django.views import generic
 from django.contrib.auth.hashers import make_password
@@ -298,3 +299,15 @@ def terms(request):
 
 def privacy_policy(request):
     return render(request, "main/privacy_policy.html")
+
+
+class LogoutView(LogoutView):
+    pass
+
+class AccountDeleteView(generic.edit.DeleteView):
+    template_name = "main/account_delete.html"
+    model = User
+    success_url = reverse_lazy("account_delete_done")
+
+class AccountDeleteDoneView(generic.base.TemplateView):
+    template_name = "main/account_delete_done.html"
