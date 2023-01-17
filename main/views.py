@@ -262,17 +262,22 @@ def others_account(request, user_id):
     # 自分がフォロー中の相手を取得
     followers = my_account.follow.all()
     # プロフィール表示をしようとしている相手をフォローしているかのチェック
-    for follower in followers:
-        if follower.id == others_account.id :
-            follow = True
-            break
-        else:
-            follow = False
+    if followers:
+        for follower in followers:
+            if follower.id == others_account.id :
+                follow = True
+                break
+            else:
+                follow = False
+    else:
+        # フォローが0でも変数"follow"を定義
+        follow = None
+        
     context = {
         "account": others_account,
         "videos": videos,
         "video_count": video_count,
-        "follow" : follow
+        "follow" : follow,
     }
     return render(request, "main/account.html", context)
 
