@@ -162,5 +162,3 @@ media/
 **/settings/local.py
 
 dump.rdb
-
-img
