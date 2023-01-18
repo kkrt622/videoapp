@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import (
     LoginView,
     PasswordChangeView,
+    LogoutView,
 )
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model, login, authenticate
@@ -21,8 +22,15 @@ from .forms import (
     PasswordResetForm,
     PasswordResetConfirmationForm,
     PasswordChangeForm,
+    ProfileChangeForm,
     VideoUploadForm,
 )
+
+from django.db.models import Q
+
+from django.db.models import Count 
+
+from django.contrib.auth.decorators import login_required
 
 import uuid
 
@@ -226,6 +234,112 @@ class PasswordChangeView(FormView):
         context["user"] = user
         return context
 
+@login_required
+def following(request):
+    following = get_object_or_404(User, id=request.user.id).follow.all()
+    context = {"following": following}
+    return render(request, "main/following.html", context)
+
+@login_required
+def my_account(request):
+    account = User.objects.annotate(
+        follower_count = Count("followed")
+    ).get(id = request.user.id)
+
+    videos = Video.objects.filter(
+    Q(user = account)
+    ).all()
+    video_count =videos.count()
+
+    # プロフィール編集の処理
+    if request.method == "GET":
+        form = ProfileChangeForm(instance=request.user)
+    elif request.method == "POST":
+        form = ProfileChangeForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            # 保存後、完了ページに遷移します
+            return redirect("my_account")
+
+    context = {
+        "account": account,
+        "form": form,
+        "videos": videos,
+        "video_count": video_count,
+    }
+    return render(request, "main/account.html", context)
+
+@login_required
+def others_account(request, user_id):
+    others_account = User.objects.annotate(
+        follower_count = Count("followed")
+    ).get(id = user_id)
+
+    videos = Video.objects.filter(
+        Q(user = others_account)
+    ).all()
+    video_count =videos.count()
+
+    my_account = User.objects.annotate(
+    follower_count = Count("followed")
+    ).get(id = request.user.id)
+    # 自分がフォロー中の相手を取得
+    followers = my_account.follow.all()
+    # プロフィール表示をしようとしている相手をフォローしているかのチェック
+    if followers:
+        for follower in followers:
+            if follower.id == others_account.id :
+                follow = True
+                break
+            else:
+                follow = False
+    else:
+        # フォローが0でも変数"follow"を定義
+        follow = None
+        
+    context = {
+        "account": others_account,
+        "videos": videos,
+        "video_count": video_count,
+        "follow" : follow,
+    }
+    return render(request, "main/account.html", context)
+
+@login_required
+def follow(request, user_id):
+    follow = User.objects.get(id = user_id)
+    request.user.follow.add(follow)
+    request.user.save()
+    return redirect("others_account", user_id)
+
+@login_required    
+def unfollow(request, user_id):
+    follow = User.objects.get(id = user_id)
+    request.user.follow.remove(follow)
+    request.user.save()
+    return redirect("others_account", user_id)
+
+@login_required
+def settings(request):
+    return render(request, "main/settings.html")
+
+def terms(request):
+    return render(request, "main/terms.html")
+
+def privacy_policy(request):
+    return render(request, "main/privacy_policy.html")
+
+
+class LogoutView(LogoutView):
+    pass
+
+class AccountDeleteView(generic.edit.DeleteView):
+    template_name = "main/account_delete.html"
+    model = User
+    success_url = reverse_lazy("account_delete_done")
+
+class AccountDeleteDoneView(generic.base.TemplateView):
+    template_name = "main/account_delete_done.html"
 
 class VideoUploadView(LoginRequiredMixin, FormView):
     template_name = "main/video_upload.html"
