@@ -14,29 +14,31 @@
 <body>
     {% block header %}
     <header class="header">
-        <div class="header__title">
-            {% block header_title %}
-            <h1>Video App</h1>
-            <i class="fa-solid fa-plus"></i>
-            {% endblock %}
+        <div class="header__item">
+            <div class="header__title">
+                {% block header_title %}<a href="{% url 'home' %}">Video App</a>{% endblock %}
+            </div>
+            <a href="{% url 'video_upload' %}" class="header__link">
+                <i class="far fa-times-circle fa-2x upload-icon"></i>
+            </a>
         </div>
     </header>
     {% endblock %}
-    <div class="main">
-        {% block content %}
-        {% endblock %}
-    </div>
+
+    {% block content %}
+    {% endblock %}
+
     {% block footer %}
     <footer class="footer">
         <div class="footer__item">
-            <a href="" class="footer__link">
-                <div class="footer__icon"><i class="fas fa-house"></i></div>
+            <a href="{% url 'home' %}" class="footer__link">
+                <div class="footer__icon"><i class="fas fa-home"></i></div>
                 <div class="footer__label">ホーム</div>
             </a>
         </div>
         <div class="footer__item">
-            <a href="" class="footer__link">
-                <div class="footer__icon"><i class="fas fa-solid fa-magnifying-glass"></i></div>
+            <a href="{% url 'search_video' %}" class="footer__link">
+                <div class="footer__icon"><i class="fas fa-search"></i></div>
                 <div class="footer__label">検索</div>
             </a>
         </div>
@@ -52,8 +54,9 @@
                 <div class="footer__label">アカウント</div>
             </a>
         </div>
-        {% endblock %}
-        {% block extra_js %}{% endblock %}
+    </footer>
+    {% endblock %}
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

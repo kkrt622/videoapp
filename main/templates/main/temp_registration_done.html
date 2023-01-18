@@ -22,8 +22,9 @@
             {{ form.code }}
         </div>
         <p class="caption">メールが届きませんか？</p>
-        <button href="{% url 'temp_registration_done' user.id %}" name="regenerate-code-btn">
+        <button class="regenerate-code-btn" type="button">
             <span>再送する</span>
+            <p class="send-email-notice"></p>
         </button>
         <button type="submit" class="registration-form-btn">認証してパスワード登録に進む</button>
     </form>
@@ -31,4 +32,37 @@
 {% endblock %}
 
 {% block footer %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    const sendRequest = () => {
+        const xhr = new XMLHttpRequest();
+        const email = "{{user.email}}";
+        const queryString = new URLSearchParams({ 'email': email }).toString();
+        const requestPath = url + '?' + queryString;
+        xhr.open('GET', requestPath)
+        xhr.responseType = "document"
+        xhr.send()
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    const sendEmailNotice = document.querySelector('.send-email-notice')
+                    sendEmailNotice.innerHTML = "メールを再送信しました。"
+                }
+                else {
+                    window.alert('通信に失敗しました')
+                }
+            }
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const regenerateCodeBtn = document.querySelector('.regenerate-code-btn')
+        regenerateCodeBtn.addEventListener('click', function (ev) {
+            sendRequest();
+        })
+    })
+</script>
 {% endblock %}

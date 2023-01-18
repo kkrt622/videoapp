@@ -4,14 +4,15 @@ from django.contrib.auth.views import (
     PasswordChangeView,
     LogoutView,
 )
-from django.views import generic
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model, login, authenticate
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView, FormView, DetailView, ListView
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.conf import settings
 from django.urls import reverse_lazy
-from .models import AuthenticationCode
+from .models import AuthenticationCode, Video
 import random
 from .forms import (
     EmailAuthenticationForm,
@@ -22,6 +23,7 @@ from .forms import (
     PasswordResetConfirmationForm,
     PasswordChangeForm,
     ProfileChangeForm,
+    VideoUploadForm,
 )
 
 from django.db.models import Q
@@ -30,13 +32,19 @@ from django.db.models import Count
 
 from django.contrib.auth.decorators import login_required
 
-from .models import Video
+import uuid
 
 User = get_user_model()
 
 
-def home(request):
-    return render(request, "main/home.html")
+class HomeView(LoginRequiredMixin, TemplateView):
+    template_name = "main/home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        video = Video.objects.all().order_by("-uploaded_date")
+        context["videos"] = video
+        return context
 
 
 def generate_random_code(email):
@@ -47,13 +55,41 @@ def generate_random_code(email):
     return random_number
 
 
+def registration_send_mail(email):
+    message_template = get_template("mail_text/registration.txt")
+    random_code = generate_random_code(email)
+    context = {
+        "email": email,
+        "random_code": random_code,
+    }
+    subject = "Video Appの本登録について"
+    message = message_template.render(context)
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = ([email],)
+    send_mail(subject, message, from_email, recipient_list)
+
+
+def password_reset_send_mail(email):
+    message_template = get_template("mail_text/password_reset.txt")
+    random_code = generate_random_code(email)
+    context = {
+        "email": email,
+        "random_code": random_code,
+    }
+    subject = "パスワード再設定について"
+    message = message_template.render(context)
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = ([email],)
+    send_mail(subject, message, from_email, recipient_list)
+
+
 class LoginView(LoginView):
     template_name = "main/login.html"
     form_class = EmailAuthenticationForm
     redirect_authenticated_user = True
 
 
-class TempRegistrationView(generic.FormView):
+class TempRegistrationView(FormView):
     template_name = "main/temp_registration.html"
     form_class = RegistrationEmailForm
     model = User
@@ -64,26 +100,16 @@ class TempRegistrationView(generic.FormView):
         email = self.request.POST.get("email")
 
         # メール送信
-        message_template = get_template("mail_text/registration.txt")
-        random_code = generate_random_code(email)
-        context = {
-            "email": email,
-            "random_code": random_code,
-        }
-        subject = "Video Appの本登録について"
-        message = message_template.render(context)
-        from_email = settings.DEFAULT_FROM_EMAIL
-        recipient_list = ([email],)
-        send_mail(subject, message, from_email, recipient_list)
+        registration_send_mail(email)
 
         # 仮登録処理
         user, created = User.objects.get_or_create(
-            email=email, defaults={"is_registered": False}
+            username=email, email=email, defaults={"is_registered": False}
         )
         return redirect("temp_registration_done", user.id)
 
 
-class TempRegistrationDoneView(generic.FormView):
+class TempRegistrationDoneView(FormView):
     template_name = "main/temp_registration_done.html"
     form_class = RegistrationCodeForm
     model = AuthenticationCode
@@ -100,6 +126,10 @@ class TempRegistrationDoneView(generic.FormView):
         return render(self.request, "main/temp_registration_done.html")
 
     def get_context_data(self, **kwargs):
+        if "email" in self.request.GET:
+            email = self.request.GET.get("email")
+            registration_send_mail(email)
+
         context = super().get_context_data(**kwargs)
         user_id = self.kwargs["user_id"]
         user = get_object_or_404(User, pk=user_id)
@@ -112,7 +142,7 @@ def regenerate_code(request):
     return render(request, "main/temp_registration_done.html")
 
 
-class SignUpView(generic.FormView):
+class SignUpView(FormView):
     template_name = "main/signup.html"
     form_class = PasswordForm
     model = User
@@ -138,7 +168,7 @@ class SignUpView(generic.FormView):
         return context
 
 
-class PasswordResetView(generic.FormView):
+class PasswordResetView(FormView):
     template_name = "main/password_reset.html"
     form_class = PasswordResetForm
     model = User
@@ -147,26 +177,15 @@ class PasswordResetView(generic.FormView):
         context = super().get_context_data(**kwargs)
         context["email"] = form.cleaned_data["email"]
         email = self.request.POST.get("email")
-        print(email)
 
         # メール送信
-        message_template = get_template("mail_text/password_reset.txt")
-        random_code = generate_random_code(email)
-        context = {
-            "email": email,
-            "random_code": random_code,
-        }
-        subject = "パスワードの再設定について"
-        message = message_template.render(context)
-        from_email = settings.DEFAULT_FROM_EMAIL
-        recipient_list = ([email],)
-        send_mail(subject, message, from_email, recipient_list)
+        password_reset_send_mail(email)
 
         user = get_object_or_404(User, email=email)
         return redirect("password_reset_confirmation", user.id)
 
 
-class PasswordResetConfirmationView(generic.FormView):
+class PasswordResetConfirmationView(FormView):
     template_name = "main/password_reset_confirmation.html"
     form_class = PasswordResetConfirmationForm
     model = AuthenticationCode
@@ -183,6 +202,11 @@ class PasswordResetConfirmationView(generic.FormView):
         return render(self.request, "main/password_reset_confirmation.html")
 
     def get_context_data(self, **kwargs):
+        # メール再送信
+        if "email" in self.request.GET:
+            email = self.request.GET.get("email")
+            password_reset_send_mail(email)
+
         context = super().get_context_data(**kwargs)
         user_id = self.kwargs["user_id"]
         user = get_object_or_404(User, pk=user_id)
@@ -190,7 +214,7 @@ class PasswordResetConfirmationView(generic.FormView):
         return context
 
 
-class PasswordChangeView(generic.FormView):
+class PasswordChangeView(FormView):
     template_name = "main/password_change.html"
     form_class = PasswordChangeForm
     success_url = reverse_lazy("login")
@@ -316,3 +340,52 @@ class AccountDeleteView(generic.edit.DeleteView):
 
 class AccountDeleteDoneView(generic.base.TemplateView):
     template_name = "main/account_delete_done.html"
+
+class VideoUploadView(LoginRequiredMixin, FormView):
+    template_name = "main/video_upload.html"
+    form_class = VideoUploadForm
+    # アカウントページに移行する必要あり
+    success_url = reverse_lazy("home")
+
+    def form_valid(self, form, **kwargs):
+        data = form.cleaned_data
+        obj = Video(**data)
+        obj.user = self.request.user
+        obj.save()
+        return super().form_valid(form)
+
+
+class PlayVideoView(LoginRequiredMixin, DetailView):
+    template_name = "main/video_play.html"
+    model = Video
+
+    def get_queryset(self, **kwargs):
+        queryset = super().get_queryset(**kwargs)
+        queryset = queryset.filter(id=self.kwargs["pk"])
+        if "views" in self.request.GET:
+            views = self.request.GET.get("views")
+            queryset.update(views_count=views)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class SearchVideoView(LoginRequiredMixin, ListView):
+    template_name = "main/video_search.html"
+    model = Video
+
+    def get_queryset(self, **kwargs):
+        queryset = super().get_queryset(**kwargs)
+        if "keyword" in self.request.GET:
+            keyword = self.request.GET.get("keyword")
+            if keyword:
+                keywords = keyword.split()
+                for k in keywords:
+                    queryset = queryset.filter(title__icontains=k)
+        if self.request.GET.get("btnType") == "favorite":
+            queryset = queryset.order_by("-views_count")[:2]
+        else:
+            queryset = queryset.order_by("-uploaded_date")
+        return queryset
