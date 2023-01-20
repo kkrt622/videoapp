@@ -6,7 +6,7 @@ from django.contrib.auth.views import (
     LogoutView,
 )
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth import get_user_model, login, authenticate
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import (
     TemplateView,
