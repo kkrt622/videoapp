@@ -22,7 +22,7 @@
 <div class="email-reset-form-container">
     <p>アカウントのメールアドレス</p>
     <p>{{ user.email }}</p>
-    <form action="{% url 'email_reset' user.id %}" method="POST" class="email-reset-form">
+    <form action="{% url 'email_reset' %}" method="POST" class="email-reset-form">
         {% csrf_token %}
         {% if form.errors %}
         <div class="email-reset-form-error">{{form.email.errors}}</div>

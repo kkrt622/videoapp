@@ -25,18 +25,18 @@ urlpatterns = [
         name="password_reset",
     ),
     path(
-        "password_reset_confirmation/<user_id>",
+        "password_reset_confirmation/<token>",
         views.PasswordResetConfirmationView.as_view(),
         name="password_reset_confirmation",
     ),
     path(
-        "password_change/<user_id>",
+        "password_change/<token>",
         views.PasswordChangeView.as_view(),
         name="password_change",
     ),
-    path("email_reset/<user_id>", views.EmailResetView.as_view(), name="email_reset"),
+    path("email_reset", views.EmailResetView.as_view(), name="email_reset"),
     path(
-        "email_reset_confirmation/<user_id>",
+        "email_reset_confirmation/<token>",
         views.EmailResetConfirmationView.as_view(),
         name="email_reset_confirmation",
     ),

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.views import (
     LoginView,
     PasswordChangeView,
@@ -57,7 +58,7 @@ def generate_random_code(email):
     return random_number
 
 
-def registration_send_mail(email):
+def registration_send_email(email):
     message_template = get_template("mail_text/registration.txt")
     random_code = generate_random_code(email)
     context = {
@@ -71,7 +72,7 @@ def registration_send_mail(email):
     send_mail(subject, message, from_email, recipient_list)
 
 
-def password_reset_send_mail(email):
+def password_reset_send_email(email):
     message_template = get_template("mail_text/password_reset.txt")
     random_code = generate_random_code(email)
     context = {
@@ -85,7 +86,7 @@ def password_reset_send_mail(email):
     send_mail(subject, message, from_email, recipient_list)
 
 
-def email_reset_send_mail(email):
+def email_reset_send_email(email):
     message_template = get_template("mail_text/email_reset.txt")
     random_code = generate_random_code(email)
     context = {
@@ -119,18 +120,12 @@ class TempRegistrationView(FormView):
 
     def form_valid(self, form, **kwargs):
         email = self.request.POST.get("email")
-
         # トークンの生成
         token = generate_token(email)
-
         # メール送信
-        registration_send_mail(email)
-
+        registration_send_email(email)
         # 送信内容をセッションに保存する
-        if "email" in self.request.session:
-            email = self.request.session["email"]
-        else:
-            self.request.session["email"] = email
+        self.request.session["signup_email"] = email
         return redirect("temp_registration_done", token)
 
 
@@ -138,28 +133,31 @@ class TempRegistrationDoneView(FormView):
     template_name = "main/temp_registration_done.html"
     form_class = RegistrationCodeForm
     model = AuthenticationCode
-    success_url = reverse_lazy("temp_registration_done")
 
-    def form_valid(self, form, **kwargs):
-        email = self.request.session.get("email")
-        token = generate_token(email)
-        input_code = self.request.POST.get("code")
-        authentication_code = AuthenticationCode.objects.get(email=email).code
-        if int(input_code) == authentication_code:
-            return redirect("signup", token)
-        return render(self.request, "main/temp_registration_done.html")
-
-    def get_context_data(self, **kwargs):
+    def get(self, request, **kwargs):
         if "email" in self.request.GET:
             email = self.request.GET.get("email")
-            registration_send_mail(email)
+            registration_send_email(email)
+        return super().get(request, **kwargs)
 
+    def form_valid(self, form, **kwargs):
+        email = self.request.session.get("signup_email")
+        token = generate_token(email)
+        input_code = self.request.POST["code"]
+        authentication_code = AuthenticationCode.objects.get(email=email).code
+        context = {"token": token, "form": form, "email": email}
+        if int(input_code) == authentication_code:
+            return redirect("signup", token)
+        else:
+            messages.error(self.request, "認証コードが正しくありません")
+        return render(self.request, "main/temp_registration_done.html", context)
+
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        email = self.request.session["email"]
+        email = self.request.session["signup_email"]
         token = generate_token(email)
         context["email"] = email
         context["token"] = token
-
         return context
 
 
@@ -167,26 +165,19 @@ class SignUpView(FormView):
     template_name = "main/signup.html"
     form_class = PasswordForm
     model = User
-    success_url = reverse_lazy("home")
+    success_url = reverse_lazy("login")
 
     def form_valid(self, form, **kwargs):
-        email = self.request.session["email"]
+        email = self.request.session["signup_email"]
         password = form.cleaned_data["password"]
         password = make_password(password)
-        user = User.objects.create(username=email, email=email, password=password)
-        user = authenticate(email=email, password=password)
-        if user:
-            login(self.request, user)
-            self.request.session.clear()
+        User.objects.create(username=email, email=email, password=password)
+        del self.request.session["signup_email"]
         return super().form_valid(form, **kwargs)
 
     def get_context_data(self, **kwargs):
-        if "email" in self.request.GET:
-            email = self.request.GET.get("email")
-            registration_send_mail(email)
-
         context = super().get_context_data(**kwargs)
-        email = self.request.session["email"]
+        email = self.request.session["signup_email"]
         token = generate_token(email)
         context["email"] = email
         context["token"] = token
@@ -200,43 +191,44 @@ class PasswordResetView(FormView):
     model = User
 
     def form_valid(self, form, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["email"] = form.cleaned_data["email"]
         email = self.request.POST.get("email")
-
+        token = generate_token(email)
         # メール送信
-        password_reset_send_mail(email)
-
-        user = get_object_or_404(User, email=email)
-        return redirect("password_reset_confirmation", user.id)
+        password_reset_send_email(email)
+        # 送信内容をセッションに保存する
+        self.request.session["password_reset_email"] = email
+        return redirect("password_reset_confirmation", token)
 
 
 class PasswordResetConfirmationView(FormView):
     template_name = "main/password_reset_confirmation.html"
     form_class = RegistrationCodeForm
     model = AuthenticationCode
-    success_url = reverse_lazy("password_reset_confirmation")
 
-    def form_valid(self, form, **kwargs):
-        user_id = self.kwargs["user_id"]
-        user = get_object_or_404(User, pk=user_id)
-        email = user.email
-        input_code = self.request.POST.get("code")
-        authentication_code = AuthenticationCode.objects.get(email=email).code
-        if int(input_code) == authentication_code:
-            return redirect("password_change", user.id)
-        return render(self.request, "main/password_reset_confirmation.html")
-
-    def get_context_data(self, **kwargs):
-        # メール再送信
+    def get(self, request, **kwargs):
         if "email" in self.request.GET:
             email = self.request.GET.get("email")
-            password_reset_send_mail(email)
+            registration_send_email(email)
+        return super().get(request, **kwargs)
 
+    def form_valid(self, form, **kwargs):
+        email = self.request.session.get("password_reset_email")
+        token = generate_token(email)
+        input_code = self.request.POST.get("code")
+        authentication_code = AuthenticationCode.objects.get(email=email).code
+        context = {"token": token, "form": form, "email": email}
+        if int(input_code) == authentication_code:
+            return redirect("password_change", token)
+        else:
+            messages.error(self.request, "認証コードが正しくありません")
+        return render(self.request, "main/password_reset_confirmation.html", context)
+
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_id = self.kwargs["user_id"]
-        user = get_object_or_404(User, pk=user_id)
-        context["user"] = user
+        email = self.request.session["password_reset_email"]
+        token = generate_token(email)
+        context["email"] = email
+        context["token"] = token
         return context
 
 
@@ -246,18 +238,19 @@ class PasswordChangeView(FormView):
     success_url = reverse_lazy("login")
 
     def form_valid(self, form, **kwargs):
-        user_id = self.kwargs["user_id"]
-        user = User.objects.filter(id=user_id)
+        email = self.request.session["password_reset_email"]
         new_password = form.cleaned_data["new_password1"]
         new_password = make_password(new_password)
+        user = User.objects.filter(email=email)
         user.update(password=new_password)
         return super().form_valid(form, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_id = self.kwargs["user_id"]
-        user = get_object_or_404(User, pk=user_id)
-        context["user"] = user
+        email = self.request.session["password_reset_email"]
+        token = generate_token(email)
+        context["email"] = email
+        context["token"] = token
         return context
 
 
@@ -267,21 +260,16 @@ class EmailResetView(LoginRequiredMixin, FormView):
     model = User
 
     def form_valid(self, form, **kwargs):
-        user_id = self.kwargs["user_id"]
-        user = get_object_or_404(User, pk=user_id)
-        context = super().get_context_data(**kwargs)
-        context["email"] = form.cleaned_data["email"]
         new_email = self.request.POST.get("email")
-        old_email = user.email
-
+        token = generate_token(new_email)
         # メール送信
-        email_reset_send_mail(new_email)
-
-        return redirect("email_reset_confirmation", user.id)
+        email_reset_send_email(new_email)
+        self.request.session["email_reset_email"] = new_email
+        return redirect("email_reset_confirmation", token)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_id = self.kwargs["user_id"]
+        user_id = self.request.user.id
         user = get_object_or_404(User, pk=user_id)
         context["user"] = user
         return context
@@ -291,29 +279,34 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
     template_name = "main/email_reset_confirmation.html"
     form_class = RegistrationCodeForm
     model = AuthenticationCode
-    success_url = reverse_lazy("home")
 
-    def form_valid(self, form, **kwargs):
-        user_id = self.kwargs["user_id"]
-        user = get_object_or_404(User, pk=user_id)
-        email = user.email
-        input_code = self.request.POST.get("code")
-        authentication_code = AuthenticationCode.objects.get(email=email).code
-        if int(input_code) == authentication_code:
-            # メールアドレスの変更
-            return redirect("home")
-        return render(self.request, "main/email_reset_confirmation.html")
-
-    def get_context_data(self, **kwargs):
-        # メール再送信
+    def get(self, request, **kwargs):
         if "email" in self.request.GET:
             email = self.request.GET.get("email")
-            email_reset_send_mail(email)
+            registration_send_email(email)
+        return super().get(request, **kwargs)
 
+    def form_valid(self, form, **kwargs):
+        new_email = self.request.session["email_reset_email"]
+        token = generate_token(new_email)
+        input_code = self.request.POST.get("code")
+        authentication_code = AuthenticationCode.objects.get(email=new_email).code
+        context = {"token": token, "form": form, "email": new_email}
+        if int(input_code) == authentication_code:
+            # メールアドレスの変更
+            user = User.objects.filter(id=self.request.user.id)
+            user.update(email=new_email)
+            return redirect("my_account")
+        else:
+            messages.error(self.request, "認証コードが正しくありません")
+        return render(self.request, "main/email_reset_confirmation.html", context)
+
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_id = self.kwargs["user_id"]
-        user = get_object_or_404(User, pk=user_id)
-        context["user"] = user
+        new_email = self.request.session["email_reset_email"]
+        token = generate_token(new_email)
+        context["email"] = new_email
+        context["token"] = token
         return context
 
 

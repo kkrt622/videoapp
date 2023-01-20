@@ -76,7 +76,7 @@ class EmailForm(forms.ModelForm):
     # 既に本登録されているユーザーは排除する
     def clean_email(self):
         email = self.cleaned_data["email"]
-        user = User.objects.filter(email=email, is_registered=True)
+        user = User.objects.filter(email=email)
         if user.exists():
             raise ValidationError("このメールアドレスは既に使われているようです。")
         return email
