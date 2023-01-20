@@ -2,23 +2,31 @@
 {% load static %}
 
 {% block extra_style %}
-<link rel="stylesheet" href="{% static 'main/css/temp_registration_done.css' %}">
+<link rel="stylesheet" href="{% static 'main/css/email_reset_confirmation.css' %}">
 {% endblock %}
 
 {% block header %}
+<header class="header">
+    <div class="header__item">
+        <a href="{% url 'email_reset' user.id %}" class="header__link">
+            <i class="fas fa-arrow-left fa-2x"></i>
+        </a>
+        <div class="header__title">
+            {% block header_title %}メールアドレス変更の完了{% endblock %}
+        </div>
+    </div>
+</header>
 {% endblock %}
 
 {% block content %}
-<div class="registration-form-container">
-    <h1>Video App</h1>
-    <h1>アカウント作成</h1>
-    <form action="{% url 'temp_registration_done' token %}" method="POST" class="registration-form">
+<div class="email-reset-form-container">
+    <form action="{% url 'email_reset_confirmation' user.id %}" method="POST" class="email-reset-form">
         {% csrf_token %}
         {% if form.errors %}
-        <div class="registration-form-error">入力された認証コードが正しくありません。</div>
+        <div class="email-reset-form-error">入力された認証コードが正しくありません。</div>
         {% endif %}
-        <p class="registration-form-text">{{email}}に数字4桁の認証コードを送信しました。<br>下のテキストボックスに記入してください。</p>
-        <div class="registration-form-field">
+        <p class="email-reset-form-text">{{user.email}}に数字4桁の認証コードを送信しました。<br>下のテキストボックスに記入してください。</p>
+        <div class="email-reset-form-field">
             {{ form.code }}
         </div>
         <p class="caption">メールが届きませんか？</p>
@@ -26,7 +34,12 @@
             <span>再送する</span>
             <p class="send-email-notice"></p>
         </button>
-        <button type="submit" class="registration-form-btn">認証してパスワード登録に進む</button>
+        <button type="submit" class="email-reset-form-btn">認証してパスワード登録に進む</button>
+        <p class="cancel-link">
+            <a href="{% url 'login' %}">
+                <span>キャンセル</span>
+            </a>
+        </p>
     </form>
 </div>
 {% endblock %}
@@ -40,7 +53,7 @@
     const params = url.searchParams;
     const sendRequest = () => {
         const xhr = new XMLHttpRequest();
-        const email = "{{email}}";
+        const email = "{{user.email}}";
         const queryString = new URLSearchParams({ 'email': email }).toString();
         const requestPath = url + '?' + queryString;
         xhr.open('GET', requestPath)
