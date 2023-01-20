@@ -1,14 +1,13 @@
-h1 {
-    text-align: center;
+.header__title {
+    margin: 0 auto;
 }
 
 span {
     color: #2B8F38;
 }
 
-.password-reset-form-container {
-    margin-top: 50px;
-    padding: 0 4vw;
+.email-reset-form-container {
+    padding: 200px 4vw;
 }
 
 .form {
@@ -22,16 +21,16 @@ span {
     padding: 5px 10px;
 }
 
-.password-reset-form-field {
+.email-reset-form-field {
     padding-bottom: 40px;
 }
 
-.password-reset-form-text {
+.email-reset-form-text {
     text-align: center;
     margin-bottom: 36px;
 }
 
-.password-reset-form-btn {
+.email-reset-form-btn {
     width: 100%;
     height: 36px;
     background-color: #2B8F38;

@@ -67,7 +67,7 @@ class EmailAuthenticationForm(forms.Form):
         return self.user_cache
 
 
-class RegistrationEmailForm(forms.ModelForm):
+class EmailForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["email"].widget.attrs["class"] = "form"
@@ -76,7 +76,7 @@ class RegistrationEmailForm(forms.ModelForm):
     # 既に本登録されているユーザーは排除する
     def clean_email(self):
         email = self.cleaned_data["email"]
-        user = User.objects.filter(email=email, is_registered=True)
+        user = User.objects.filter(email=email)
         if user.exists():
             raise ValidationError("このメールアドレスは既に使われているようです。")
         return email
@@ -113,7 +113,7 @@ class PasswordResetForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["email"].widget.attrs["class"] = "form"
-        self.fields["email"].widget.attrs["placeholder"] = "メールアドレス"
+        self.fields["email"].widget.attrs["placeholder"] = "入力テキスト"
 
     class Meta:
         model = User
@@ -149,6 +149,17 @@ class PasswordChangeForm(forms.Form):
             raise ValidationError("6文字以上にしてください")
         if new_password1 != new_password2:
             raise ValidationError("パスワードが一致しません")
+
+
+class ProfileChangeForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("icon", "username", "profile")
+        labels = {
+            "username": "ユーザー名",
+            "profile": "紹介文",
+        }
+        widgets = {"icon": forms.FileInput(attrs={"onchange": "previewImage(this);"})}
 
 
 class VideoUploadForm(forms.ModelForm):
