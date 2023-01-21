@@ -171,7 +171,7 @@ class SignUpView(FormView):
         email = self.request.session["signup_email"]
         password = form.cleaned_data["password"]
         password = make_password(password)
-        User.objects.create(username=email, email=email, password=password)
+        User.objects.create(username="ゲスト", email=email, password=password)
         del self.request.session["signup_email"]
         return super().form_valid(form, **kwargs)
 
