@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import (
     LoginView,
     PasswordChangeView,
@@ -28,6 +29,7 @@ from .forms import (
     PasswordForm,
     PasswordResetForm,
     PasswordChangeForm,
+    PasswordResetForm,
     ProfileChangeForm,
     VideoUploadForm,
 )
@@ -185,8 +187,8 @@ class SignUpView(FormView):
         return context
 
 
-class PasswordResetView(FormView):
-    template_name = "main/password_reset.html"
+class PasswordResetEmailView(FormView):
+    template_name = "main/password_reset_email.html"
     form_class = PasswordResetForm
     model = User
 
@@ -218,7 +220,7 @@ class PasswordResetConfirmationView(FormView):
         authentication_code = AuthenticationCode.objects.get(email=email).code
         context = {"token": token, "form": form, "email": email}
         if int(input_code) == authentication_code:
-            return redirect("password_change", token)
+            return redirect("password_reset", token)
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/password_reset_confirmation.html", context)
@@ -232,9 +234,9 @@ class PasswordResetConfirmationView(FormView):
         return context
 
 
-class PasswordChangeView(FormView):
-    template_name = "main/password_change.html"
-    form_class = PasswordChangeForm
+class PasswordResetView(FormView):
+    template_name = "main/password_reset.html"
+    form_class = PasswordResetForm
     success_url = reverse_lazy("login")
 
     def form_valid(self, form, **kwargs):
@@ -252,6 +254,12 @@ class PasswordChangeView(FormView):
         context["email"] = email
         context["token"] = token
         return context
+
+
+class PasswordChangeView(auth_views.PasswordChangeView):
+    template_name = "main/password_change.html"
+    form_class = PasswordChangeForm
+    success_url = reverse_lazy("my_account")
 
 
 class EmailResetView(LoginRequiredMixin, FormView):
@@ -466,7 +474,7 @@ class SearchVideoView(LoginRequiredMixin, ListView):
                 for k in keywords:
                     queryset = queryset.filter(title__icontains=k)
         if self.request.GET.get("btnType") == "favorite":
-            queryset = queryset.order_by("-views_count")[:2]
+            queryset = queryset.order_by("-views_count")
         else:
             queryset = queryset.order_by("-uploaded_date")
         return queryset

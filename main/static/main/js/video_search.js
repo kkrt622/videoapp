@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             const oldDom = document.querySelectorAll(".video-information-container")
                             if (newDom) {
                                 oldDom.forEach((element) => {
+                                    console.log(newDom)
                                     videoList.removeChild(element);
                                 });
                                 newDom.forEach((element) => {
