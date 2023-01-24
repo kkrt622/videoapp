@@ -26,9 +26,9 @@
                 <img src="{% static 'main/img/sample.jpeg' %}">
             </div>
             <div class="video-detail-container">
-                <div class="icon-wrapper">
+                <a href="{% url 'others_account' video.user.id %}" class="icon-wrapper">
                     <img src="{% static 'main/img/sample.jpeg' %}">
-                </div>
+                </a>
                 <div class="text-wrapper">
                     <p class="video-title">{{video.title}}</p>
                     <div class="video-detail-wrapper">

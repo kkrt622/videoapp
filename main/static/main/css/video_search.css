@@ -73,6 +73,7 @@
 }
 
 .icon-wrapper {
+    display: block;
     margin-right: 0.75rem;
 }
 
