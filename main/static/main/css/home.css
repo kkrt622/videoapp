@@ -2,13 +2,16 @@
     padding-top: 64px;
 }
 
+.video-list-container {
+    padding: 64px 0;
+}
+
 .video-information-container {
-    display: block;
-    margin-top: 0.75rem;
     margin-bottom: 1rem;
 }
 
 .video-thumbnail-wrapper {
+    display: block;
     position: relative;
     width: 100%;
 }
@@ -32,10 +35,6 @@
     padding-right: 4vw;
     display: flex;
     margin-top: 0.75rem;
-}
-
-.video-container a:nth-last-of-type(1) {
-    padding-bottom: 64px;
 }
 
 .icon-wrapper {
