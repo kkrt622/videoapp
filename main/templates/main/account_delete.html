@@ -7,13 +7,13 @@
 
 {% block header %}
 <header class="header">
-    <div class="header__title">
-        {% block header_title %}
-        <a href="{% url 'my_account' %}">
-            <i class="fa-solid fa-arrow-left"></i>
+    <div class="header__item">
+        <a href="{% url 'my_account' %}" class="header__link">
+            <i class="fas fa-arrow-left fa-2x"></i>
         </a>
-        <h1>アカウントの削除</h1>
-        {% endblock %}
+        <div class="header__title">
+            {% block header_title %}アカウントの削除{% endblock %}
+        </div>
     </div>
 </header>
 {% endblock %}
@@ -24,7 +24,8 @@
     <div class="account-delete-detail">
         <p class="account-delete-detail-text">削除するアカウント</p>
         <div class="account-delete-detail-user">
-            <img src="{% if user.icon %}{{ user.icon.url }}{% else %}{% static 'main/img/default-icon.png' %}{% endif %}" class="account-delete-detail-user-icon">
+            <img src="{% if user.icon %}{{ user.icon.url }}{% else %}{% static 'main/img/default-icon.png' %}{% endif %}"
+                class="account-delete-detail-user-icon">
             <p class="account-delete-detail-user-name">{{ user.username }}</p>
         </div>
     </div>

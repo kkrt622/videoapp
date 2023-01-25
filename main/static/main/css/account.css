@@ -1,11 +1,12 @@
 .account {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 48px;
+    padding: 48px 4vw 64px 4vw;
 }
 
 .account__icon {
+    text-align: center;
+}
+
+.account__icon img {
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -17,14 +18,15 @@
     font-weight: 700;
     font-size: 21px;
     line-height: 30px;
-    margin: 2px 0;
+    margin: 2px auto;
     word-wrap: break-word;
-    width: 70%;
+    width: 100%;
     text-align: center;
 }
 
 .account-detail {
     display: flex;
+    justify-content: center;
 }
 
 .account-detail p {
@@ -43,17 +45,22 @@
     text-align: center;
     letter-spacing: 0.4px;
     margin-top: 4px;
-    width: 85%;
     word-wrap: break-word;
+    position: relative;
+}
 
+.more-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1;
 }
 
 .account-settings-btns {
     margin: 10px 0;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    width: 85%;
 }
 
 .account-edit-profile-btn {
@@ -74,7 +81,6 @@
 .account-follow-btns {
     display: flex;
     flex-wrap: wrap;
-    width: 100%;
     justify-content: center;
     margin-top: 10px;
     position: relative;
@@ -111,7 +117,6 @@
 .account-video-btns {
     display: flex;
     justify-content: flex-start;
-    width: 90%;
     margin-top: 20px;
 }
 
@@ -119,7 +124,7 @@
     margin-right: 10px;
 }
 
-.account-video-btn-newest, 
+.account-video-btn-newest,
 .account-video-btn-popular {
     font-weight: 500;
     font-size: 13px;
@@ -133,15 +138,70 @@
     background-color: #FFFFFF;
 }
 
+.video-container {
+    padding-top: 22px;
+}
+
+.video-container-card {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.video-information-container {
+    display: flex;
+    width: 90%;
+}
+
+.video-thumbnail-wrapper {
+    position: relative;
+    width: 50%;
+}
+
+.video-thumbnail-wrapper::before {
+    padding-top: 56%;
+    display: block;
+    content: "";
+}
+
+.video-thumbnail-wrapper img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.video-detail-container {
+    padding: 0 4vw;
+    display: flex;
+    justify-content: space-between;
+}
+
+.video-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.video-detail-wrapper {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.6);
+}
+
 /* ラジオボタン非表示 */
-input[type=radio].account-video-btn{
-        display: none;
+input[type=radio].account-video-btn {
+    display: none;
 }
 
 .selected {
     color: #FFFFFF;
     border: 1px solid #FFFFFF;
-    background-color: rgba(0, 0, 0, 0.87);;
+    background-color: rgba(0, 0, 0, 0.87);
+    ;
 }
 
 /* プロフィール編集のCSS */
@@ -247,7 +307,7 @@ input[type=radio].account-video-btn{
     letter-spacing: 0.4px;
 }
 
-.edit-username-text, 
+.edit-username-text,
 .edit-profile-text {
     display: flex;
     align-items: center;
@@ -346,14 +406,11 @@ input[type=radio].account-video-btn{
     color: #2B8F38;
 }
 
-.video-speed, 
 .email-change {
     display: flex;
     align-items: center;
 }
 
-.video-speed i,
-.video-quality i,
 .email-change i,
 .password-change i,
 .feedback i {
@@ -361,9 +418,6 @@ input[type=radio].account-video-btn{
     text-align: center;
 }
 
-
-.video-speed-text,
-.video-quality-text,
 .email-change-text,
 .password-change-text,
 .feedback-text {
@@ -376,7 +430,6 @@ input[type=radio].account-video-btn{
     margin: 16px 0;
 }
 
-.video-quality,
 .password-change,
 .feedback {
     display: flex;
@@ -417,6 +470,7 @@ input[type=radio].account-video-btn{
     letter-spacing: 1.25px;
     color: #2B8F38;
 }
+
 .account-delete {
     display: flex;
     width: 100%;

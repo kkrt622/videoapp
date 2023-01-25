@@ -12,7 +12,7 @@
 <div class="registration-form-container">
     <h1>Video App</h1>
     <h1>アカウント作成を完了する</h1>
-    <form action="{% url 'signup' user.id %}" method="POST" class="registration-form">
+    <form action="{% url 'signup' token %}" method="POST" class="registration-form">
         {% csrf_token %}
         {% if form.password.errors %}
         {% for error in form.password.erros %}

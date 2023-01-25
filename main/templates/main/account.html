@@ -8,7 +8,9 @@
 
 {% block content %}
 <div class="account">
-    <img src="{% if account.icon %}{{ account.icon.url }}{% else %}{% static 'main/img/default-icon.png' %}{% endif %}" class="account__icon">
+    <div class="account__icon">
+        <img src="{% static 'main/img/default-icon.png' %}">
+    </div>
     <h2 class="account-username">
         {{ account.username }}
     </h2>
@@ -22,29 +24,56 @@
         </div>
     </div>
     <div class="account-profile">
-        {{ account.profile }}
+        <p class="account-profile-text">{{ account.profile|default:"" }}</p>
+        <p class="more-button">もっと見る...</p>
     </div>
     {% if account.id == request.user.id %}
-        <div class="account-settings-btns">
-            <div class="account-edit-profile-btn">プロフィールを編集</div>
-            <div class="account-settings-btn"><i class="fa-solid fa-gear"></i></div>
-        </div>
+    <div class="account-settings-btns">
+        <div class="account-edit-profile-btn">プロフィールを編集</div>
+        <div class="account-settings-btn"><i class="fa-solid fa-gear"></i></div>
+    </div>
     {% else %}
-        <div class="account-follow-btns">
-            {% if follow == True %}
-                <a href="{% url 'unfollow' account.id %}" class="account-following-btn btn-visible">フォロー中</a>
-            {% else %}
-                <a href="{% url 'follow' account.id %}" class="account-follow-btn">フォロー</a>
-            {% endif %}
-        </div>
+    <div class="account-follow-btns">
+        {% if follow %}
+        <a href="{% url 'unfollow' account.id %}" class="account-following-btn btn-visible">フォロー中</a>
+        {% else %}
+        <a href="{% url 'follow' account.id %}" class="account-follow-btn">フォロー</a>
+        {% endif %}
+    </div>
     {% endif %}
     <div class="account-video-btns">
         <label class="account-video-btn-newest selected">
-            <input class="account-video-btn" type="radio" name="video-switch" value="video-newest" checked="checked" >新着の動画
+            <input class="account-video-btn" type="radio" name="video-switch" value="video-newest"
+                checked="checked">新着の動画
         </label>
         <label class="account-video-btn-popular">
-            <input class="account-video-btn" type="radio" name="video-switch" value="video-popular" >人気の動画
+            <input class="account-video-btn" type="radio" name="video-switch" value="video-popular">人気の動画
         </label>
+    </div>
+    <div class="video-container">
+
+        {% for video in videos %}
+        <div class="video-container-card">
+            <a class="video-information-container" href="{% url 'video_play' video.id %}">
+                <div class="video-thumbnail-wrapper">
+                    <img src="{% static 'main/img/sample.jpeg' %}">
+                </div>
+                <div class="video-detail-container">
+                    <div class="text-wrapper">
+                        <p class="video-title">{{video.title}}</p>
+                        <div class="video-detail-wrapper">
+                            <p class="video-views">{{video.views_count}}回視聴</p>
+                            <span>・</span>
+                            <p class="video-uploaded-at">{{video.get_elapsed_time}}</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <div class="">
+                <i class="fas fa-ellipsis-v"></i>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -60,7 +89,9 @@
         <table class="edit-form-containers">
             <div class="edit-icon">
                 {{ form.icon }}
-                <img id="preview"  class="account__icon" src="{% if account.icon %}{{ account.icon.url }}{% else %}{% static 'main/img/default-icon.png' %}{% endif %}">
+                <div class="account__icon">
+                    <img id="preview" src="{% static 'main/img/default-icon.png' %}">
+                </div>
                 <i class="fa-regular fa-image"></i>
             </div>
             <div class="edit-username-container">
@@ -89,35 +120,18 @@
         <h1>設定</h1>
     </div>
     <div class="settings-container">
-        <div class="video-settings">
-            <h2>動画再生の設定</h2>
-            <div class="video-speed">
-                <i class="fa-solid fa-play"></i>
-                <div class="video-speed-text">
-                    <p>再生速度</p>
-                    <p>標準</p>
-                </div>
-            </div>
-            <div class="video-quality">
-                <i class="fa-regular fa-image"></i>
-                <div class="video-quality-text">
-                    <p>画質</p>
-                    <p>1080p</p>
-                </div>
-            </div>
-        </div>
         <div class="account-settings">
             <h2>アカウントの設定</h2>
             <div class="email-change">
                 <i class="fa-regular fa-envelope"></i>
                 <div class="email-change-text">
-                    <p>メールアドレスの変更</p>
+                    <a href="{% url 'email_reset' %}">メールアドレスの変更</a>
                 </div>
             </div>
             <div class="password-change">
                 <i class="fa-solid fa-asterisk"></i>
                 <div class="password-change-text">
-                    <a href="{% url 'password_change' account.id %}">パスワードの変更</a>
+                    <a href="{% url 'password_change' %}">パスワードの変更</a>
                 </div>
             </div>
         </div>
@@ -147,4 +161,23 @@
 
 {% block extra_js %}
 <script src="{% static 'main/js/account.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 「もっと見るボタン」
+        const moreBtn = document.querySelector('.more-button');
+        const accountProfile = document.querySelector('.account-profile-text');
+        const accountProfileStr = accountProfile.textContent
+        const accountProfileLength = accountProfileStr.length;
+        if (accountProfileLength > 200) {
+            accountProfile.textContent = accountProfileStr.substring(0, 200) + '...'
+            moreBtn.addEventListener('click', function (ev) {
+                accountProfile.textContent = '{{account.profile}}'
+                moreBtn.style.display = 'none'
+            })
+        }
+        else {
+            moreBtn.style.display = 'none'
+        }
+    })
+</script>
 {% endblock %}

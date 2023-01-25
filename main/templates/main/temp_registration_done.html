@@ -12,12 +12,12 @@
 <div class="registration-form-container">
     <h1>Video App</h1>
     <h1>アカウント作成</h1>
-    <form action="{% url 'temp_registration_done' user.id %}" method="POST" class="registration-form">
+    <form action="{% url 'temp_registration_done' token %}" method="POST" class="registration-form">
         {% csrf_token %}
-        {% if form.errors %}
-        <div class="registration-form-error">入力された認証コードが正しくありません。</div>
-        {% endif %}
-        <p class="registration-form-text">{{user.email}}に数字4桁の認証コードを送信しました。<br>下のテキストボックスに記入してください。</p>
+        <p class="registration-form-text">{{email}}に数字4桁の認証コードを送信しました。<br>下のテキストボックスに記入してください。</p>
+        {% for message in messages %}
+        <div class="registration-form-error">{{ message }}</div>
+        {% endfor %}
         <div class="registration-form-field">
             {{ form.code }}
         </div>
@@ -40,7 +40,7 @@
     const params = url.searchParams;
     const sendRequest = () => {
         const xhr = new XMLHttpRequest();
-        const email = "{{user.email}}";
+        const email = "{{email}}";
         const queryString = new URLSearchParams({ 'email': email }).toString();
         const requestPath = url + '?' + queryString;
         xhr.open('GET', requestPath)

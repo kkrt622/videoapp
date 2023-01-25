@@ -1,14 +1,9 @@
 .header__title {
-    justify-content: flex-start;
-}
-
-.header__title a {
-    width: 10%;
-    text-align: center;
+    margin: 0 auto;
 }
 
 .account-delete {
-    padding: 0 4px;
+    padding: 0 4vw;
 }
 
 .account-delete-caution {
@@ -48,7 +43,8 @@
     height: 36px;
     border-radius: 50%;
     object-fit: cover;
-    padding: 0 16px;
+    margin-right: 16px;
+    margin-top: 12px;
 }
 
 .account-delete-detail-user-name {
@@ -56,8 +52,8 @@
     font-style: normal;
     font-weight: 400;
     font-size: 15px;
-    line-height: 22px; 
-    letter-spacing: 0.5px;    
+    line-height: 22px;
+    letter-spacing: 0.5px;
     color: rgba(0, 0, 0, 0.87);
 }
 
