@@ -32,6 +32,7 @@ from .forms import (
     PasswordResetForm,
     ProfileChangeForm,
     VideoUploadForm,
+    VideoSearchForm,
 )
 from django.db.models import Q
 from django.db.models import Count
@@ -465,14 +466,23 @@ class SearchVideoView(LoginRequiredMixin, ListView):
     template_name = "main/video_search.html"
     model = Video
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        form = VideoSearchForm(self.request.GET)
+        if form.is_valid():
+            context["keyword"] = form.cleaned_data["keyword"]
+
+        context["form"] = form
+        return context
+
     def get_queryset(self, **kwargs):
         queryset = super().get_queryset(**kwargs)
-        if "keyword" in self.request.GET:
-            keyword = self.request.GET.get("keyword")
+        form = VideoSearchForm(self.request.GET)
+        if form.is_valid():
+            keyword = form.cleaned_data["keyword"]
             if keyword:
-                keywords = keyword.split()
-                for k in keywords:
-                    queryset = queryset.filter(title__icontains=k)
+                queryset = queryset.filter(title__icontains=keyword)
         if self.request.GET.get("btnType") == "favorite":
             queryset = queryset.order_by("-views_count")
         else:

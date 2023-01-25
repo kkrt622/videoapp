@@ -192,3 +192,10 @@ class VideoUploadForm(forms.ModelForm):
     class Meta:
         model = Video
         fields = ("title", "description", "thumbnail", "video")
+
+
+class VideoSearchForm(forms.Form):
+    keyword = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "動画を検索", "class": "search-form"}),
+    )
