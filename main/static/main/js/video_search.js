@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
     searchButtonList.forEach(function (element, index) {
         element.addEventListener("click", function (ev) {
             // ボタンデザインの切り替え
-            preActiveButton = document.querySelector(".active")
+            var preActiveButton = document.querySelector(".active")
             preActiveButton.classList.remove("active")
             element.classList.add("active")
             // 「人気の動画」を選択すると閲覧回数が多い順に表示する
