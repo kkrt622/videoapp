@@ -97,6 +97,17 @@ class RegistrationCodeForm(forms.ModelForm):
         fields = ("code",)
 
 
+class PasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["old_password"].widget.attrs["class"] = "old_password"  # classの指定
+        self.fields["new_password1"].widget.attrs["class"] = "new_password1"
+        self.fields["new_password2"].widget.attrs["class"] = "new_password2"
+        self.fields["old_password"].widget.attrs["placeholder"] = "現在のパスワード"
+        self.fields["new_password1"].widget.attrs["placeholder"] = "新しいパスワード"
+        self.fields["new_password2"].widget.attrs["placeholder"] = "新しいパスワード（確認）"
+
+
 class PasswordForm(forms.ModelForm):
     password = forms.CharField(
         widget=PasswordInput(
@@ -131,7 +142,7 @@ class PasswordResetConfirmationForm(forms.ModelForm):
         fields = ("code",)
 
 
-class PasswordChangeForm(forms.Form):
+class PasswordResetForm(forms.Form):
     new_password1 = forms.CharField(
         widget=PasswordInput({"placeholder": "新しいパスワード", "class": "form"})
     )
@@ -181,3 +192,10 @@ class VideoUploadForm(forms.ModelForm):
     class Meta:
         model = Video
         fields = ("title", "description", "thumbnail", "video")
+
+
+class VideoSearchForm(forms.Form):
+    keyword = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "動画を検索", "class": "search-form"}),
+    )

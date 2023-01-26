@@ -1,3 +1,5 @@
+"use strict";
+
 // タイトルフォームの文字数をカウント
 function ShowTitleLength(str) {
     document.getElementById('title-form-length').innerHTML = str.length + '/50';

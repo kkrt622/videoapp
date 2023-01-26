@@ -1,5 +1,5 @@
 .account {
-    padding: 48px 4vw 0 4vw;
+    padding: 48px 4vw 64px 4vw;
 }
 
 .account__icon {
@@ -116,33 +116,25 @@
 
 .account-video-btns {
     display: flex;
-    justify-content: flex-start;
     margin-top: 20px;
 }
 
-.account-video-btn-newest {
-    margin-right: 10px;
-}
-
-.account-video-btn-newest,
-.account-video-btn-popular {
-    font-weight: 500;
-    font-size: 13px;
-    line-height: 19px;
-    letter-spacing: 1.25px;
-    padding: 8.5px 12px;
-    border-radius: 19px;
-
-    color: rgba(0, 0, 0, 0.87);
-    border: 1px solid rgba(0, 0, 0, 0.87);
-    background-color: #FFFFFF;
+.search-button {
+    height: 36px;
+    width: 100px;
+    border-radius: 18px;
+    outline: none;
+    margin-right: 0.75rem;
+    border: 1px solid #212121;
+    background-color: white;
+    color: #212121;
 }
 
 .video-container {
     padding-top: 22px;
 }
 
-.video-container-card {
+.video-list-container {
     display: flex;
     justify-content: space-between;
     margin-top: 0.75rem;
@@ -197,11 +189,10 @@ input[type=radio].account-video-btn {
     display: none;
 }
 
-.selected {
-    color: #FFFFFF;
-    border: 1px solid #FFFFFF;
-    background-color: rgba(0, 0, 0, 0.87);
-    ;
+.active {
+    border: 1px solid white;
+    background-color: #212121;
+    color: white;
 }
 
 /* プロフィール編集のCSS */

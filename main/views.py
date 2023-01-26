@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import (
     LoginView,
     PasswordChangeView,
@@ -18,7 +19,7 @@ from django.views.generic import (
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.conf import settings
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from .models import AuthenticationCode, Video
 import random
 from .forms import (
@@ -28,11 +29,12 @@ from .forms import (
     PasswordForm,
     PasswordResetForm,
     PasswordChangeForm,
+    PasswordResetForm,
     ProfileChangeForm,
     VideoUploadForm,
+    VideoSearchForm,
 )
-from django.db.models import Q
-from django.db.models import Count
+from django.db.models import Count, Case, When, Prefetch
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 import hashlib
@@ -185,8 +187,8 @@ class SignUpView(FormView):
         return context
 
 
-class PasswordResetView(FormView):
-    template_name = "main/password_reset.html"
+class PasswordResetEmailView(FormView):
+    template_name = "main/password_reset_email.html"
     form_class = PasswordResetForm
     model = User
 
@@ -218,7 +220,7 @@ class PasswordResetConfirmationView(FormView):
         authentication_code = AuthenticationCode.objects.get(email=email).code
         context = {"token": token, "form": form, "email": email}
         if int(input_code) == authentication_code:
-            return redirect("password_change", token)
+            return redirect("password_reset", token)
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/password_reset_confirmation.html", context)
@@ -232,9 +234,9 @@ class PasswordResetConfirmationView(FormView):
         return context
 
 
-class PasswordChangeView(FormView):
-    template_name = "main/password_change.html"
-    form_class = PasswordChangeForm
+class PasswordResetView(FormView):
+    template_name = "main/password_reset.html"
+    form_class = PasswordResetForm
     success_url = reverse_lazy("login")
 
     def form_valid(self, form, **kwargs):
@@ -252,6 +254,14 @@ class PasswordChangeView(FormView):
         context["email"] = email
         context["token"] = token
         return context
+
+
+class PasswordChangeView(auth_views.PasswordChangeView):
+    template_name = "main/password_change.html"
+    form_class = PasswordChangeForm
+
+    def get_success_url(self):
+        return reverse("account", kwargs={"pk": self.kwargs["pk"]})
 
 
 class EmailResetView(LoginRequiredMixin, FormView):
@@ -296,7 +306,7 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
             # メールアドレスの変更
             user = User.objects.filter(id=self.request.user.id)
             user.update(email=new_email)
-            return redirect("my_account")
+            return redirect("account", self.request.user.id)
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/email_reset_confirmation.html", context)
@@ -317,83 +327,62 @@ def following(request):
     return render(request, "main/following.html", context)
 
 
-@login_required
-def my_account(request):
-    account = User.objects.annotate(follower_count=Count("followed")).get(
-        id=request.user.id
-    )
+class AccountView(LoginRequiredMixin, DetailView):
+    template_name = "main/account.html"
+    model = User
 
-    videos = Video.objects.filter(Q(user=account)).all()
-    video_count = videos.count()
-
-    # プロフィール編集の処理
-    if request.method == "GET":
+    def get(self, request, **kwargs):
         form = ProfileChangeForm(instance=request.user)
-    elif request.method == "POST":
+        return super().get(request, **kwargs)
+
+    def post(self, request, **kwargs):
         form = ProfileChangeForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            # 保存後、完了ページに遷移します
-            return redirect("my_account")
+            return redirect("account", self.kwargs["pk"])
 
-    context = {
-        "account": account,
-        "form": form,
-        "videos": videos,
-        "video_count": video_count,
-    }
-    return render(request, "main/account.html", context)
+    def get_queryset(self, **kwargs):
+        queryset = super().get_queryset(**kwargs)
+        queryset = (
+            User.objects.filter(pk=self.kwargs["pk"])
+            .prefetch_related(
+                Prefetch("video", queryset=Video.objects.order_by("-uploaded_date"))
+            )
+            .annotate(follower_count=Count("followed"), video_count=Count("video"))
+        )
 
+        if self.kwargs["pk"] != self.request.user.pk:
+            follow_list = self.request.user.follow.all().values_list("id", flat=True)
+            queryset = queryset.annotate(
+                is_follow=Case(
+                    When(id__in=follow_list, then=True),
+                    default=False,
+                )
+            )
+        return queryset
 
-@login_required
-def others_account(request, user_id):
-    others_account = User.objects.annotate(follower_count=Count("followed")).get(
-        id=user_id
-    )
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = ProfileChangeForm(instance=self.request.user)
+        context["form"] = form
 
-    videos = Video.objects.filter(Q(user=others_account)).all()
-    video_count = videos.count()
-
-    my_account = User.objects.annotate(follower_count=Count("followed")).get(
-        id=request.user.id
-    )
-    # 自分がフォロー中の相手を取得
-    followers = my_account.follow.all()
-    # プロフィール表示をしようとしている相手をフォローしているかのチェック
-    if followers:
-        for follower in followers:
-            if follower.id == others_account.id:
-                follow = True
-                break
-            else:
-                follow = False
-    else:
-        # フォローが0でも変数"follow"を定義
-        follow = None
-
-    context = {
-        "account": others_account,
-        "videos": videos,
-        "video_count": video_count,
-        "follow": follow,
-    }
-    return render(request, "main/account.html", context)
+        return context
 
 
 @login_required
-def follow(request, user_id):
-    follow = User.objects.get(id=user_id)
+def follow(request, pk):
+    follow = User.objects.get(pk=pk)
     request.user.follow.add(follow)
     request.user.save()
-    return redirect("others_account", user_id)
+    return redirect("account", pk)
 
 
 @login_required
-def unfollow(request, user_id):
-    follow = User.objects.get(id=user_id)
+def unfollow(request, pk):
+    follow = User.objects.get(id=pk)
     request.user.follow.remove(follow)
     request.user.save()
-    return redirect("others_account", user_id)
+    return redirect("account", pk)
 
 
 class SettingsView(LoginRequiredMixin, TemplateView):
@@ -442,7 +431,7 @@ class PlayVideoView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self, **kwargs):
         queryset = super().get_queryset(**kwargs)
-        queryset = queryset.filter(id=self.kwargs["pk"])
+        queryset = queryset.filter(pk=self.kwargs["pk"])
         if "views" in self.request.GET:
             views = self.request.GET.get("views")
             queryset.update(views_count=views)
@@ -457,16 +446,25 @@ class SearchVideoView(LoginRequiredMixin, ListView):
     template_name = "main/video_search.html"
     model = Video
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        form = VideoSearchForm(self.request.GET)
+        if form.is_valid():
+            context["keyword"] = form.cleaned_data["keyword"]
+
+        context["form"] = form
+        return context
+
     def get_queryset(self, **kwargs):
         queryset = super().get_queryset(**kwargs)
-        if "keyword" in self.request.GET:
-            keyword = self.request.GET.get("keyword")
+        form = VideoSearchForm(self.request.GET)
+        if form.is_valid():
+            keyword = form.cleaned_data["keyword"]
             if keyword:
-                keywords = keyword.split()
-                for k in keywords:
-                    queryset = queryset.filter(title__icontains=k)
+                queryset = queryset.filter(title__icontains=keyword)
         if self.request.GET.get("btnType") == "favorite":
-            queryset = queryset.order_by("-views_count")[:2]
+            queryset = queryset.order_by("-views_count")
         else:
             queryset = queryset.order_by("-uploaded_date")
         return queryset

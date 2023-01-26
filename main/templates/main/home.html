@@ -6,17 +6,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="video-container">
+<div class="video-list-container">
 
     {% for video in videos %}
-    <a class="video-information-container" href="{% url 'video_play' video.id %}">
-        <div class="video-thumbnail-wrapper">
+    <div class="video-information-container">
+        <a class="video-thumbnail-wrapper" href="{% url 'video_play' video.id %}">
             <img src="{% static 'main/img/sample.jpeg' %}">
-        </div>
+        </a>
         <div class="video-detail-container">
-            <div class="icon-wrapper">
+            <a href="{% url 'account' video.user.id %}" class="icon-wrapper">
                 <img src="{% static 'main/img/sample.jpeg' %}">
-            </div>
+            </a>
             <div class="text-wrapper">
                 <p class="video-title">{{video.title}}</p>
                 <div class="video-detail-wrapper">
@@ -28,7 +28,7 @@
                 </div>
             </div>
         </div>
-    </a>
+    </div>
     {% endfor %}
 </div>
 {% endblock %}

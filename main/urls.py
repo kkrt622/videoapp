@@ -20,9 +20,9 @@ urlpatterns = [
         name="signup",
     ),
     path(
-        "password_reset",
-        views.PasswordResetView.as_view(),
-        name="password_reset",
+        "password_reset_email",
+        views.PasswordResetEmailView.as_view(),
+        name="password_reset_email",
     ),
     path(
         "password_reset_confirmation/<token>",
@@ -30,9 +30,12 @@ urlpatterns = [
         name="password_reset_confirmation",
     ),
     path(
-        "password_change/<token>",
-        views.PasswordChangeView.as_view(),
-        name="password_change",
+        "password_reset/<token>",
+        views.PasswordResetView.as_view(),
+        name="password_reset",
+    ),
+    path(
+        "password_change/", views.PasswordChangeView.as_view(), name="password_change"
     ),
     path("email_reset", views.EmailResetView.as_view(), name="email_reset"),
     path(
@@ -47,22 +50,17 @@ urlpatterns = [
         name="following",
     ),
     path(
-        "my_account",
-        views.my_account,
-        name="my_account",
+        "account/<int:pk>",
+        views.AccountView.as_view(),
+        name="account",
     ),
     path(
-        "others_account/<user_id>",
-        views.others_account,
-        name="others_account",
-    ),
-    path(
-        "unfollow/<user_id>",
+        "unfollow/<int:pk>",
         views.unfollow,
         name="unfollow",
     ),
     path(
-        "follow/<user_id>",
+        "follow/<int:pk>",
         views.follow,
         name="follow",
     ),
