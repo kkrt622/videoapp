@@ -366,19 +366,19 @@ class AccountView(LoginRequiredMixin, DetailView):
 
 
 @login_required
-def follow(request, user_id):
-    follow = User.objects.get(id=user_id)
+def follow(request, pk):
+    follow = User.objects.get(pk=pk)
     request.user.follow.add(follow)
     request.user.save()
-    return redirect("others_account", user_id)
+    return redirect("account", pk)
 
 
 @login_required
-def unfollow(request, user_id):
-    follow = User.objects.get(id=user_id)
+def unfollow(request, pk):
+    follow = User.objects.get(id=pk)
     request.user.follow.remove(follow)
     request.user.save()
-    return redirect("others_account", user_id)
+    return redirect("account", pk)
 
 
 class SettingsView(LoginRequiredMixin, TemplateView):
