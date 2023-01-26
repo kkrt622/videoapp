@@ -348,7 +348,10 @@ class AccountView(LoginRequiredMixin, DetailView):
             .prefetch_related(
                 Prefetch("video", queryset=Video.objects.order_by("-uploaded_date"))
             )
-            .annotate(follower_count=Count("followed"), video_count=Count("video"))
+            .annotate(
+                follower_count=Count("followed", distinct=True),
+                video_count=Count("video"),
+            )
         )
 
         if self.kwargs["pk"] != self.request.user.pk:
@@ -379,7 +382,7 @@ def follow(request, pk):
 
 @login_required
 def unfollow(request, pk):
-    follow = User.objects.get(id=pk)
+    follow = User.objects.get(pk=pk)
     request.user.follow.remove(follow)
     request.user.save()
     return redirect("account", pk)
