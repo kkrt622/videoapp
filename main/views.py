@@ -19,7 +19,7 @@ from django.views.generic import (
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.conf import settings
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from .models import AuthenticationCode, Video
 import random
 from .forms import (
@@ -34,7 +34,7 @@ from .forms import (
     VideoUploadForm,
     VideoSearchForm,
 )
-from django.db.models import Q, Count, Case, When
+from django.db.models import Count, Case, When, Prefetch
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 import hashlib
@@ -259,7 +259,9 @@ class PasswordResetView(FormView):
 class PasswordChangeView(auth_views.PasswordChangeView):
     template_name = "main/password_change.html"
     form_class = PasswordChangeForm
-    success_url = reverse_lazy("my_account")
+
+    def get_success_url(self):
+        return reverse("account", kwargs={"pk": self.kwargs["pk"]})
 
 
 class EmailResetView(LoginRequiredMixin, FormView):
@@ -304,7 +306,7 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
             # メールアドレスの変更
             user = User.objects.filter(id=self.request.user.id)
             user.update(email=new_email)
-            return redirect("my_account")
+            return redirect("account", self.request.user.id)
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/email_reset_confirmation.html", context)
@@ -343,7 +345,9 @@ class AccountView(LoginRequiredMixin, DetailView):
         queryset = super().get_queryset(**kwargs)
         queryset = (
             User.objects.filter(pk=self.kwargs["pk"])
-            .prefetch_related("video")
+            .prefetch_related(
+                Prefetch("video", queryset=Video.objects.order_by("-uploaded_date"))
+            )
             .annotate(follower_count=Count("followed"), video_count=Count("video"))
         )
 

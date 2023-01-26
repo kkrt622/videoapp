@@ -1,17 +1,5 @@
 "use strict";
 
-// 動画表示ボタンの切り替え
-var newest = document.querySelector(".account-video-btn-newest");
-var popular = document.querySelector(".account-video-btn-popular");
-newest.addEventListener("click", function () {
-    newest.classList.add("selected")
-    popular.classList.remove("selected")
-});
-popular.addEventListener("click", function () {
-    popular.classList.add("selected")
-    newest.classList.remove("selected")
-});
-
 // プロフィール編集の表示切り替え
 var edit_target = document.querySelector('.edit-profile');
 var edit_button = document.querySelector('.account-edit-profile-btn');

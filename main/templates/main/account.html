@@ -43,18 +43,13 @@
     </div>
     {% endif %}
     <div class="account-video-btns">
-        <label class="account-video-btn-newest selected">
-            <input class="account-video-btn" type="radio" name="video-switch" value="video-newest"
-                checked="checked">新着の動画
-        </label>
-        <label class="account-video-btn-popular">
-            <input class="account-video-btn" type="radio" name="video-switch" value="video-popular">人気の動画
-        </label>
+        <button class="search-button active">新着の動画</button>
+        <button class="search-button">人気の動画</button>
     </div>
     <div class="video-container">
 
         {% for video in object.video.all %}
-        <div class="video-container-card">
+        <div class="video-list-container">
             <a class="video-information-container" href="{% url 'video_play' video.id %}">
                 <div class="video-thumbnail-wrapper">
                     <img src="{% static 'main/img/sample.jpeg' %}">
@@ -162,23 +157,4 @@
 
 {% block extra_js %}
 <script src="{% static 'main/js/account.js' %}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // 「もっと見るボタン」
-        const moreBtn = document.querySelector('.more-button');
-        const accountProfile = document.querySelector('.account-profile-text');
-        const accountProfileStr = accountProfile.textContent
-        const accountProfileLength = accountProfileStr.length;
-        if (accountProfileLength > 200) {
-            accountProfile.textContent = accountProfileStr.substring(0, 200) + '...'
-            moreBtn.addEventListener('click', function (ev) {
-                accountProfile.textContent = '{{object.profile}}'
-                moreBtn.style.display = 'none'
-            })
-        }
-        else {
-            moreBtn.style.display = 'none'
-        }
-    })
-</script>
 {% endblock %}
