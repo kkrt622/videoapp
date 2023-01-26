@@ -12,32 +12,33 @@
         <img src="{% static 'main/img/default-icon.png' %}">
     </div>
     <h2 class="account-username">
-        {{ account.username }}
+        {{ object.username }}
     </h2>
     <div class="account-detail">
         <div class="account-detail-video-count">
-            <p>{{ video_count }} 本の動画</p>
+            <!-- ここ変更する必要あり -->
+            <p>{{ object.video_count }} 本の動画</p>
         </div>
         <p>・</p>
         <div class="account-detail-following">
-            <p>{{ account.follower_count }} 人のフォロワー</p>
+            <p>{{ object.follower_count }} 人のフォロワー</p>
         </div>
     </div>
     <div class="account-profile">
-        <p class="account-profile-text">{{ account.profile|default:"" }}</p>
+        <p class="account-profile-text">{{ object.profile }}</p>
         <p class="more-button">もっと見る...</p>
     </div>
-    {% if account.id == request.user.id %}
+    {% if object.id == request.user.id %}
     <div class="account-settings-btns">
         <div class="account-edit-profile-btn">プロフィールを編集</div>
         <div class="account-settings-btn"><i class="fa-solid fa-gear"></i></div>
     </div>
     {% else %}
     <div class="account-follow-btns">
-        {% if follow %}
-        <a href="{% url 'unfollow' account.id %}" class="account-following-btn btn-visible">フォロー中</a>
+        {% if object.is_follow %}
+        <a href="{% url 'unfollow' object.id %}" class="account-following-btn btn-visible">フォロー中</a>
         {% else %}
-        <a href="{% url 'follow' account.id %}" class="account-follow-btn">フォロー</a>
+        <a href="{% url 'follow' object.id %}" class="account-follow-btn">フォロー</a>
         {% endif %}
     </div>
     {% endif %}
@@ -52,7 +53,7 @@
     </div>
     <div class="video-container">
 
-        {% for video in videos %}
+        {% for video in object.video.all %}
         <div class="video-container-card">
             <a class="video-information-container" href="{% url 'video_play' video.id %}">
                 <div class="video-thumbnail-wrapper">
@@ -84,7 +85,7 @@
         <h1>プロフィールを編集</h1>
         <button type="submit" form="edit-form">保存</button>
     </div>
-    <form action="{% url 'my_account' %}" method="POST" id="edit-form" enctype="multipart/form-data">
+    <form action="{% url 'account' object.id %}" method="POST" id="edit-form" enctype="multipart/form-data">
         {% csrf_token %}
         <table class="edit-form-containers">
             <div class="edit-icon">
@@ -152,7 +153,7 @@
             </div>
             <div class="account-delete">
                 <p class="account-delete-text">アカウントの削除は</p>
-                <a href="{% url 'account_delete' account.id %}" class="account-delete-link">こちら</a>
+                <a href="{% url 'account_delete' object.id %}" class="account-delete-link">こちら</a>
             </div>
         </div>
     </div>
@@ -171,7 +172,7 @@
         if (accountProfileLength > 200) {
             accountProfile.textContent = accountProfileStr.substring(0, 200) + '...'
             moreBtn.addEventListener('click', function (ev) {
-                accountProfile.textContent = '{{account.profile}}'
+                accountProfile.textContent = '{{object.profile}}'
                 moreBtn.style.display = 'none'
             })
         }

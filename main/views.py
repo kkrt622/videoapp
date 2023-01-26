@@ -34,8 +34,7 @@ from .forms import (
     VideoUploadForm,
     VideoSearchForm,
 )
-from django.db.models import Q
-from django.db.models import Count
+from django.db.models import Q, Count, Case, When
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 import hashlib
@@ -326,67 +325,44 @@ def following(request):
     return render(request, "main/following.html", context)
 
 
-@login_required
-def my_account(request):
-    account = User.objects.annotate(follower_count=Count("followed")).get(
-        id=request.user.id
-    )
+class AccountView(LoginRequiredMixin, DetailView):
+    template_name = "main/account.html"
+    model = User
 
-    videos = Video.objects.filter(Q(user=account)).all()
-    video_count = videos.count()
-
-    # プロフィール編集の処理
-    if request.method == "GET":
+    def get(self, request, **kwargs):
         form = ProfileChangeForm(instance=request.user)
-    elif request.method == "POST":
+        return super().get(request, **kwargs)
+
+    def post(self, request, **kwargs):
         form = ProfileChangeForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            # 保存後、完了ページに遷移します
-            return redirect("my_account")
+            return redirect("account", self.kwargs["pk"])
 
-    context = {
-        "account": account,
-        "form": form,
-        "videos": videos,
-        "video_count": video_count,
-    }
-    return render(request, "main/account.html", context)
+    def get_queryset(self, **kwargs):
+        queryset = super().get_queryset(**kwargs)
+        queryset = (
+            User.objects.filter(pk=self.kwargs["pk"])
+            .prefetch_related("video")
+            .annotate(follower_count=Count("followed"), video_count=Count("video"))
+        )
 
+        if self.kwargs["pk"] != self.request.user.pk:
+            follow_list = self.request.user.follow.all().values_list("id", flat=True)
+            queryset = queryset.annotate(
+                is_follow=Case(
+                    When(id__in=follow_list, then=True),
+                    default=False,
+                )
+            )
+        return queryset
 
-@login_required
-def others_account(request, user_id):
-    others_account = User.objects.annotate(follower_count=Count("followed")).get(
-        id=user_id
-    )
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = ProfileChangeForm(instance=self.request.user)
+        context["form"] = form
 
-    videos = Video.objects.filter(Q(user=others_account)).all()
-    video_count = videos.count()
-
-    my_account = User.objects.annotate(follower_count=Count("followed")).get(
-        id=request.user.id
-    )
-    # 自分がフォロー中の相手を取得
-    followers = my_account.follow.all()
-    # プロフィール表示をしようとしている相手をフォローしているかのチェック
-    if followers:
-        for follower in followers:
-            if follower.id == others_account.id:
-                follow = True
-                break
-            else:
-                follow = False
-    else:
-        # フォローが0でも変数"follow"を定義
-        follow = None
-
-    context = {
-        "account": others_account,
-        "videos": videos,
-        "video_count": video_count,
-        "follow": follow,
-    }
-    return render(request, "main/account.html", context)
+        return context
 
 
 @login_required
@@ -451,7 +427,7 @@ class PlayVideoView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self, **kwargs):
         queryset = super().get_queryset(**kwargs)
-        queryset = queryset.filter(id=self.kwargs["pk"])
+        queryset = queryset.filter(pk=self.kwargs["pk"])
         if "views" in self.request.GET:
             views = self.request.GET.get("views")
             queryset.update(views_count=views)
