@@ -50,22 +50,17 @@ urlpatterns = [
         name="following",
     ),
     path(
-        "my_account",
-        views.my_account,
-        name="my_account",
+        "account/<int:pk>",
+        views.AccountView.as_view(),
+        name="account",
     ),
     path(
-        "others_account/<user_id>",
-        views.others_account,
-        name="others_account",
-    ),
-    path(
-        "unfollow/<user_id>",
+        "unfollow/<int:pk>",
         views.unfollow,
         name="unfollow",
     ),
     path(
-        "follow/<user_id>",
+        "follow/<int:pk>",
         views.follow,
         name="follow",
     ),

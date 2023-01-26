@@ -8,7 +8,7 @@
 {% block header %}
 <header class="header">
     <div class="header__item">
-        <a href="{% url 'my_account' %}" class="header__link">
+        <a href="{{request.META.HTTP_REFERER}}" class="header__link">
             <i class="fas fa-arrow-left fa-2x"></i>
         </a>
         <div class="header__title">
@@ -33,7 +33,7 @@
         <div class="btn-container">
             <button type="submit" class="email-reset-form-btn">認証コードを送信</button>
             <p class="cancel-link">
-                <a href="{% url 'login' %}">
+                <a href="{{request.META.HTTP_REFERER}}">
                     <span>キャンセル</span>
                 </a>
             </p>
