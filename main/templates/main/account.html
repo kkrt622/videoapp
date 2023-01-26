@@ -9,7 +9,7 @@
 {% block content %}
 <div class="account">
     <div class="account__icon">
-        <img src="{% static 'main/img/default-icon.png' %}">
+        <img src="{{ object.icon_url }}">
     </div>
     <h2 class="account-username">
         {{ object.username }}
