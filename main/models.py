@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from datetime import timedelta
 from django.utils import timezone
+from django.templatetags.static import static
 import os
 import uuid
 
@@ -21,6 +22,11 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.email}"
+
+    def icon_url(self):
+        if self.icon:
+            return self.icon.url
+        return static("main/img/default-icon.png")
 
 
 class AuthenticationCode(models.Model):
