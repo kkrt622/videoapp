@@ -79,13 +79,3 @@ class Video(models.Model):
 
     def __str__(self):
         return self.title
-
-
-class VideoComment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    comment = models.CharField("コメント", max_length=500)
-    created_at = models.DateTimeField("", auto_now_add=True)
-
-    class Meta:
-        verbose_name_plural = "フィードバックコメント"
