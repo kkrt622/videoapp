@@ -120,15 +120,12 @@ class PasswordForm(forms.ModelForm):
         fields = ("password",)
 
 
-class PasswordResetEmailForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["email"].widget.attrs["class"] = "form"
-        self.fields["email"].widget.attrs["placeholder"] = "入力テキスト"
-
-    class Meta:
-        model = User
-        fields = ("email",)
+class PasswordResetEmailForm(forms.Form):
+    email = forms.EmailField(
+        widget=forms.EmailInput(
+            attrs={"autofocus": True, "placeholder": "メールアドレス", "class": "form"}
+        ),
+    )
 
 
 class PasswordResetConfirmationForm(forms.ModelForm):
