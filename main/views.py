@@ -334,7 +334,7 @@ class AccountView(LoginRequiredMixin, DetailView):
         form = ProfileChangeForm(instance=request.user)
         return super().get(request, **kwargs)
 
-    def post(self, request):
+    def post(self, request, **kwargs):
         form = ProfileChangeForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
