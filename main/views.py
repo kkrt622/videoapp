@@ -35,7 +35,6 @@ from .forms import (
 )
 from django.db.models import Count, Case, When, Prefetch
 from django.contrib.auth.decorators import login_required
-from django.utils import timezone
 import hashlib
 
 User = get_user_model()
@@ -102,7 +101,6 @@ def email_reset_send_email(email):
 
 
 def generate_token(email):
-    dt = timezone.now()
     str = email
     token = hashlib.sha1(str.encode("utf-8")).hexdigest()
     return token
