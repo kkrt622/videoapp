@@ -256,7 +256,7 @@ class PasswordResetView(FormView):
         return context
 
 
-class PasswordChangeView(auth_views.PasswordChangeView):
+class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     template_name = "main/password_change.html"
     form_class = PasswordChangeForm
 
@@ -404,7 +404,7 @@ class LogoutView(LogoutView):
     pass
 
 
-class AccountDeleteView(DeleteView):
+class AccountDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "main/account_delete.html"
     model = User
     success_url = reverse_lazy("account_delete_done")
