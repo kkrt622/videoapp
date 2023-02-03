@@ -188,7 +188,7 @@ class PasswordResetEmailView(FormView):
     form_class = PasswordResetEmailForm
     model = User
 
-    def form_valid(self):
+    def form_valid(self, form):
         email = self.request.POST.get("email")
         token = generate_token(email)
         # メール送信
