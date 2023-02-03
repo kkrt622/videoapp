@@ -180,7 +180,6 @@ class SignUpView(FormView):
         token = generate_token(email)
         context["email"] = email
         context["token"] = token
-
         return context
 
 
