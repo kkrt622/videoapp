@@ -3,7 +3,6 @@ from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import (
     LoginView,
-    PasswordChangeView,
     LogoutView,
 )
 from django.contrib.auth.hashers import make_password
@@ -120,7 +119,7 @@ class TempRegistrationView(FormView):
     form_class = EmailForm
     model = User
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self):
         email = self.request.POST.get("email")
         # トークンの生成
         token = generate_token(email)
@@ -142,7 +141,7 @@ class TempRegistrationDoneView(FormView):
             registration_send_email(email)
         return super().get(request, **kwargs)
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form):
         email = self.request.session.get("signup_email")
         token = generate_token(email)
         input_code = self.request.POST["code"]
@@ -192,7 +191,7 @@ class PasswordResetEmailView(FormView):
     form_class = PasswordResetForm
     model = User
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self):
         email = self.request.POST.get("email")
         token = generate_token(email)
         # メール送信
@@ -213,7 +212,7 @@ class PasswordResetConfirmationView(FormView):
             registration_send_email(email)
         return super().get(request, **kwargs)
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form):
         email = self.request.session.get("password_reset_email")
         token = generate_token(email)
         input_code = self.request.POST.get("code")
@@ -269,7 +268,7 @@ class EmailResetView(LoginRequiredMixin, FormView):
     form_class = EmailForm
     model = User
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self):
         new_email = self.request.POST.get("email")
         token = generate_token(new_email)
         # メール送信
@@ -296,7 +295,7 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
             registration_send_email(email)
         return super().get(request, **kwargs)
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form):
         new_email = self.request.session["email_reset_email"]
         token = generate_token(new_email)
         input_code = self.request.POST.get("code")
@@ -335,7 +334,7 @@ class AccountView(LoginRequiredMixin, DetailView):
         form = ProfileChangeForm(instance=request.user)
         return super().get(request, **kwargs)
 
-    def post(self, request, **kwargs):
+    def post(self, request):
         form = ProfileChangeForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
