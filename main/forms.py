@@ -78,7 +78,7 @@ class EmailForm(forms.ModelForm):
         email = self.cleaned_data["email"]
         user = User.objects.filter(email=email)
         if user.exists():
-            raise ValidationError("このメールアドレスは既に使われているようです。")
+            raise ValidationError("このメールアドレスは既に使われています。")
         return email
 
     class Meta:
@@ -100,7 +100,7 @@ class RegistrationCodeForm(forms.ModelForm):
 class PasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["old_password"].widget.attrs["class"] = "old_password"  # classの指定
+        self.fields["old_password"].widget.attrs["class"] = "old_password"
         self.fields["new_password1"].widget.attrs["class"] = "new_password1"
         self.fields["new_password2"].widget.attrs["class"] = "new_password2"
         self.fields["old_password"].widget.attrs["placeholder"] = "現在のパスワード"
@@ -120,7 +120,7 @@ class PasswordForm(forms.ModelForm):
         fields = ("password",)
 
 
-class PasswordResetForm(forms.ModelForm):
+class PasswordResetEmailForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["email"].widget.attrs["class"] = "form"

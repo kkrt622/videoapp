@@ -26,7 +26,7 @@ from .forms import (
     EmailForm,
     RegistrationCodeForm,
     PasswordForm,
-    PasswordResetForm,
+    PasswordResetEmailForm,
     PasswordChangeForm,
     PasswordResetForm,
     ProfileChangeForm,
@@ -188,7 +188,7 @@ class SignUpView(FormView):
 
 class PasswordResetEmailView(FormView):
     template_name = "main/password_reset_email.html"
-    form_class = PasswordResetForm
+    form_class = PasswordResetEmailForm
     model = User
 
     def form_valid(self):
@@ -260,7 +260,7 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     form_class = PasswordChangeForm
 
     def get_success_url(self):
-        return reverse("account", kwargs={"pk": self.kwargs["pk"]})
+        return reverse("account", kwargs={"pk": self.request.user.pk})
 
 
 class EmailResetView(LoginRequiredMixin, FormView):
@@ -268,7 +268,7 @@ class EmailResetView(LoginRequiredMixin, FormView):
     form_class = EmailForm
     model = User
 
-    def form_valid(self):
+    def form_valid(self, form):
         new_email = self.request.POST.get("email")
         token = generate_token(new_email)
         # メール送信
@@ -419,7 +419,7 @@ class VideoUploadView(LoginRequiredMixin, FormView):
     # アカウントページに移行する必要あり
     success_url = reverse_lazy("home")
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form):
         data = form.cleaned_data
         obj = Video(**data)
         obj.user = self.request.user
