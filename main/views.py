@@ -119,7 +119,7 @@ class TempRegistrationView(FormView):
     form_class = EmailForm
     model = User
 
-    def form_valid(self):
+    def form_valid(self, form):
         email = self.request.POST.get("email")
         # トークンの生成
         token = generate_token(email)
