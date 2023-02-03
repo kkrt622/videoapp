@@ -3,7 +3,6 @@ from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import (
     LoginView,
-    PasswordChangeView,
     LogoutView,
 )
 from django.contrib.auth.hashers import make_password
@@ -27,7 +26,7 @@ from .forms import (
     EmailForm,
     RegistrationCodeForm,
     PasswordForm,
-    PasswordResetForm,
+    PasswordResetEmailForm,
     PasswordChangeForm,
     PasswordResetForm,
     ProfileChangeForm,
@@ -120,7 +119,7 @@ class TempRegistrationView(FormView):
     form_class = EmailForm
     model = User
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form):
         email = self.request.POST.get("email")
         # トークンの生成
         token = generate_token(email)
@@ -142,7 +141,7 @@ class TempRegistrationDoneView(FormView):
             registration_send_email(email)
         return super().get(request, **kwargs)
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form):
         email = self.request.session.get("signup_email")
         token = generate_token(email)
         input_code = self.request.POST["code"]
@@ -189,10 +188,10 @@ class SignUpView(FormView):
 
 class PasswordResetEmailView(FormView):
     template_name = "main/password_reset_email.html"
-    form_class = PasswordResetForm
+    form_class = PasswordResetEmailForm
     model = User
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self):
         email = self.request.POST.get("email")
         token = generate_token(email)
         # メール送信
@@ -213,7 +212,7 @@ class PasswordResetConfirmationView(FormView):
             registration_send_email(email)
         return super().get(request, **kwargs)
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form):
         email = self.request.session.get("password_reset_email")
         token = generate_token(email)
         input_code = self.request.POST.get("code")
@@ -256,12 +255,12 @@ class PasswordResetView(FormView):
         return context
 
 
-class PasswordChangeView(auth_views.PasswordChangeView):
+class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     template_name = "main/password_change.html"
     form_class = PasswordChangeForm
 
     def get_success_url(self):
-        return reverse("account", kwargs={"pk": self.kwargs["pk"]})
+        return reverse("account", kwargs={"pk": self.request.user.pk})
 
 
 class EmailResetView(LoginRequiredMixin, FormView):
@@ -269,7 +268,7 @@ class EmailResetView(LoginRequiredMixin, FormView):
     form_class = EmailForm
     model = User
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form):
         new_email = self.request.POST.get("email")
         token = generate_token(new_email)
         # メール送信
@@ -296,7 +295,7 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
             registration_send_email(email)
         return super().get(request, **kwargs)
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form):
         new_email = self.request.session["email_reset_email"]
         token = generate_token(new_email)
         input_code = self.request.POST.get("code")
@@ -404,7 +403,7 @@ class LogoutView(LogoutView):
     pass
 
 
-class AccountDeleteView(DeleteView):
+class AccountDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "main/account_delete.html"
     model = User
     success_url = reverse_lazy("account_delete_done")
@@ -420,7 +419,7 @@ class VideoUploadView(LoginRequiredMixin, FormView):
     # アカウントページに移行する必要あり
     success_url = reverse_lazy("home")
 
-    def form_valid(self, form, **kwargs):
+    def form_valid(self, form):
         data = form.cleaned_data
         obj = Video(**data)
         obj.user = self.request.user

@@ -25,7 +25,7 @@
         </div>
     </div>
     <div class="account-profile">
-        <p class="account-profile-text">{{ object.profile }}</p>
+        <p class="account-profile-text">{{ object.profile|default:"まだ登録されていません" }}</p>
         <p class="more-button">もっと見る...</p>
     </div>
     {% if object.id == request.user.id %}
@@ -69,6 +69,8 @@
                 <i class="fas fa-ellipsis-v"></i>
             </div>
         </div>
+        {% empty %}
+        <p>アップロードされた動画はありません</p>
         {% endfor %}
     </div>
 </div>
