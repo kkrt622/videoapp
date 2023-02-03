@@ -9,7 +9,7 @@
 {% block content %}
 <div class="account">
     <div class="account__icon">
-        <img src="{% static 'main/img/default-icon.png' %}">
+        <img src="{{ object.icon_url }}">
     </div>
     <h2 class="account-username">
         {{ object.username }}
@@ -25,7 +25,7 @@
         </div>
     </div>
     <div class="account-profile">
-        <p class="account-profile-text">{{ object.profile }}</p>
+        <p class="account-profile-text">{{ object.profile|default:"まだ登録されていません" }}</p>
         <p class="more-button">もっと見る...</p>
     </div>
     {% if object.id == request.user.id %}
@@ -69,6 +69,8 @@
                 <i class="fas fa-ellipsis-v"></i>
             </div>
         </div>
+        {% empty %}
+        <p>アップロードされた動画はありません</p>
         {% endfor %}
     </div>
 </div>
@@ -157,4 +159,23 @@
 
 {% block extra_js %}
 <script src="{% static 'main/js/account.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 「もっと見るボタン」
+        const moreBtn = document.querySelector('.more-button');
+        const accountProfile = document.querySelector('.account-profile-text');
+        const accountProfileStr = accountProfile.textContent
+        const accountProfileLength = accountProfileStr.length;
+        if (accountProfileLength > 200) {
+            accountProfile.textContent = accountProfileStr.substring(0, 200) + '...'
+            moreBtn.addEventListener('click', function (ev) {
+                accountProfile.textContent = '{{object.profile}}'
+                moreBtn.style.display = 'none'
+            })
+        }
+        else {
+            moreBtn.style.display = 'none'
+        }
+    })
+</script>
 {% endblock %}

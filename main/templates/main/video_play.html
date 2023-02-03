@@ -34,7 +34,7 @@
             <p class="video-uploaded-at">{{video.uploaded_date|date:"Y/m/d"}}</p>
         </div>
         <a class="user-information-wrapper" href="{% url 'account' video.user.id %}">
-            <img src="{% static 'main/img/sample.jpeg' %}">
+            <img src="{{video.user.icon_url}}">
             <p class="video-creator">{{video.user.username}}</p>
         </a>
         <hr noshade size="1">

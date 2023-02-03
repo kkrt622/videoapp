@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from datetime import timedelta
 from django.utils import timezone
+from django.templatetags.static import static
 import os
 import uuid
 
@@ -21,6 +22,11 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.email}"
+
+    def icon_url(self):
+        if self.icon:
+            return self.icon.url
+        return static("main/img/default-icon.png")
 
 
 class AuthenticationCode(models.Model):
@@ -73,13 +79,3 @@ class Video(models.Model):
 
     def __str__(self):
         return self.title
-
-
-class VideoComment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    comment = models.CharField("コメント", max_length=500)
-    created_at = models.DateTimeField("", auto_now_add=True)
-
-    class Meta:
-        verbose_name_plural = "フィードバックコメント"
