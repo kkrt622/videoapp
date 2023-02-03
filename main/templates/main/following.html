@@ -12,8 +12,7 @@
         {% for following in following %}
         <li class="following-list__item">
             <a href="{% url 'account' following.id %}" class="following-list__link">
-                <img src="{% if following.icon %}{{ following.icon.url }}{% else %}{% static 'main/img/default-icon.png' %}{% endif %}"
-                    class="following-list__icon">
+                <img src="{{ following.icon_url }}" class="following-list__icon">
                 <p class="following-list__username">{{ following.username }}</p>
             </a>
         </li>
