@@ -15,7 +15,7 @@ class User(AbstractUser):
     follow = models.ManyToManyField("User", related_name="followed", symmetrical=False)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["username"]
 
     class Meta:
         verbose_name_plural = "ユーザー"
