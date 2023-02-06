@@ -153,8 +153,6 @@ class PasswordResetForm(forms.Form):
     def clean(self):
         new_password1 = self.cleaned_data["new_password1"]
         new_password2 = self.cleaned_data["new_password2"]
-        if len(new_password1) < 6:
-            raise ValidationError("6文字以上にしてください")
         if new_password1 != new_password2:
             raise ValidationError("パスワードが一致しません")
 
