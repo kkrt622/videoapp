@@ -101,8 +101,8 @@ def email_reset_send_email(email):
 
 
 def generate_token(email):
-    str = email
-    token = hashlib.sha1(str.encode("utf-8")).hexdigest()
+    email_text = email
+    token = hashlib.sha256(email_text.encode("utf-8")).hexdigest()
     return token
 
 
