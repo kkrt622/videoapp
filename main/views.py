@@ -51,7 +51,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
 
 
 def generate_random_code(email):
-    random_number = random.randrange(1000, 9999)
+    random_number = "{:0>4}".format(random.randrange(10000))
     AuthenticationCode.objects.update_or_create(
         email=email, defaults={"code": random_number, "email": email}
     )
@@ -327,7 +327,6 @@ class AccountView(LoginRequiredMixin, DetailView):
     model = User
 
     def get(self, request, **kwargs):
-        form = ProfileChangeForm(instance=request.user)
         return super().get(request, **kwargs)
 
     def post(self, request, **kwargs):
