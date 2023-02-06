@@ -30,7 +30,7 @@ class User(AbstractUser):
 
 
 class AuthenticationCode(models.Model):
-    code = models.IntegerField()
+    code = models.CharField("認証コード", max_length=4)
     email = models.EmailField("メールアドレス", unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

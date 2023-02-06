@@ -145,7 +145,7 @@ class TempRegistrationDoneView(FormView):
         input_code = self.request.POST["code"]
         authentication_code = AuthenticationCode.objects.get(email=email).code
         context = {"token": token, "form": form, "email": email}
-        if int(input_code) == authentication_code:
+        if input_code == authentication_code:
             return redirect("signup", token)
         else:
             messages.error(self.request, "認証コードが正しくありません")
@@ -215,7 +215,7 @@ class PasswordResetConfirmationView(FormView):
         input_code = self.request.POST.get("code")
         authentication_code = AuthenticationCode.objects.get(email=email).code
         context = {"token": token, "form": form, "email": email}
-        if int(input_code) == authentication_code:
+        if input_code == authentication_code:
             return redirect("password_reset", token)
         else:
             messages.error(self.request, "認証コードが正しくありません")
@@ -298,8 +298,7 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
         input_code = self.request.POST.get("code")
         authentication_code = AuthenticationCode.objects.get(email=new_email).code
         context = {"token": token, "form": form, "email": new_email}
-        if int(input_code) == authentication_code:
-            # メールアドレスの変更
+        if input_code == authentication_code:
             user = User.objects.filter(id=self.request.user.id)
             user.update(email=new_email)
             return redirect("account", self.request.user.id)
