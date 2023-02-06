@@ -45,7 +45,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        video = Video.objects.all().order_by("-uploaded_date")
+        video = Video.objects.all().order_by("-uploaded_at")
         context["videos"] = video
         return context
 
@@ -341,7 +341,7 @@ class AccountView(LoginRequiredMixin, DetailView):
         queryset = (
             User.objects.filter(pk=self.kwargs["pk"])
             .prefetch_related(
-                Prefetch("video", queryset=Video.objects.order_by("-uploaded_date"))
+                Prefetch("video", queryset=Video.objects.order_by("-uploaded_at"))
             )
             .annotate(
                 follower_count=Count("followed", distinct=True),
@@ -460,5 +460,5 @@ class SearchVideoView(LoginRequiredMixin, ListView):
         if self.request.GET.get("btnType") == "favorite":
             queryset = queryset.order_by("-views_count")
         else:
-            queryset = queryset.order_by("-uploaded_date")
+            queryset = queryset.order_by("-uploaded_at")
         return queryset

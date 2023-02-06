@@ -44,10 +44,10 @@ def video_directory_path(instance, filename):
 
 class Video(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="video")
-    title = models.TextField("タイトル", max_length=50)
+    title = models.CharField("タイトル", max_length=50)
     description = models.TextField("説明", max_length=500)
     thumbnail = models.ImageField("サムネイル", upload_to="thumbnail/")
-    uploaded_date = models.DateTimeField("動画投稿時刻", auto_now_add=True)
+    uploaded_at = models.DateTimeField("動画投稿時刻", auto_now_add=True)
     video = models.FileField("ビデオファイル", upload_to=video_directory_path)
     views_count = models.IntegerField("視聴回数", default=0)
 
@@ -58,7 +58,7 @@ class Video(models.Model):
         return os.path.basename(self.video.name).split(".")[0]
 
     def get_elapsed_time(self):
-        delta = timezone.now() - self.uploaded_date
+        delta = timezone.now() - self.uploaded_at
 
         zero = timedelta()
         one_hour = timedelta(hours=1)
