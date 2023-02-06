@@ -252,7 +252,7 @@ class PasswordResetView(FormView):
         return context
 
 
-class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
+class PasswordChangeView(auth_views.PasswordChangeView):
     template_name = "main/password_change.html"
     form_class = PasswordChangeForm
 
