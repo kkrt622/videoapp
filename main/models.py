@@ -33,9 +33,16 @@ class AuthenticationCode(models.Model):
     code = models.CharField("認証コード", max_length=4)
     email = models.EmailField("メールアドレス", unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name_plural = "認証コード"
+
+    def is_valid(self):
+        elapsed_time = timezone.now() - self.updated_at
+        if elapsed_time.seconds > 30:
+            return False
+        return True
 
 
 def video_directory_path(instance, filename):

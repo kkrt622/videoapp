@@ -143,10 +143,14 @@ class TempRegistrationDoneView(FormView):
         email = self.request.session.get("signup_email")
         token = generate_token(email)
         input_code = self.request.POST["code"]
-        authentication_code = AuthenticationCode.objects.get(email=email).code
+        authentication_code_obj = AuthenticationCode.objects.get(email=email)
+        authentication_code = authentication_code_obj.code
         context = {"token": token, "form": form, "email": email}
         if input_code == authentication_code:
-            return redirect("signup", token)
+            if authentication_code_obj.is_valid():
+                return redirect("signup", token)
+            else:
+                messages.error(self.request, "この認証コードは無効です。新しい認証コードを発行してください。")
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/temp_registration_done.html", context)
@@ -213,10 +217,14 @@ class PasswordResetConfirmationView(FormView):
         email = self.request.session.get("password_reset_email")
         token = generate_token(email)
         input_code = self.request.POST.get("code")
-        authentication_code = AuthenticationCode.objects.get(email=email).code
         context = {"token": token, "form": form, "email": email}
+        authentication_code_obj = AuthenticationCode.objects.get(email=email)
+        authentication_code = authentication_code_obj.code
         if input_code == authentication_code:
-            return redirect("password_reset", token)
+            if authentication_code_obj.is_valid():
+                return redirect("password_reset", token)
+            else:
+                messages.error(self.request, "この認証コードは無効です。新しい認証コードを発行してください。")
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/password_reset_confirmation.html", context)
@@ -296,12 +304,16 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
         new_email = self.request.session["email_reset_email"]
         token = generate_token(new_email)
         input_code = self.request.POST.get("code")
-        authentication_code = AuthenticationCode.objects.get(email=new_email).code
+        authentication_code_obj = AuthenticationCode.objects.get(email=new_email)
+        authentication_code = authentication_code_obj.code
         context = {"token": token, "form": form, "email": new_email}
         if input_code == authentication_code:
-            user = User.objects.filter(id=self.request.user.id)
-            user.update(email=new_email)
-            return redirect("account", self.request.user.id)
+            if authentication_code_obj.is_valid():
+                user = User.objects.filter(id=self.request.user.id)
+                user.update(email=new_email)
+                return redirect("account", self.request.user.id)
+            else:
+                messages.error(self.request, "この認証コードは無効です。新しい認証コードを発行してください。")
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/email_reset_confirmation.html", context)
