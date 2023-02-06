@@ -436,10 +436,6 @@ class PlayVideoView(LoginRequiredMixin, DetailView):
             queryset.update(views_count=views)
         return queryset
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
 
 class SearchVideoView(LoginRequiredMixin, ListView):
     template_name = "main/video_search.html"
