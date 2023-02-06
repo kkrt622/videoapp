@@ -67,8 +67,8 @@ def registration_send_email(email):
     }
     subject = "Video Appの本登録について"
     message = message_template.render(context)
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = ([email],)
+    from_email = None
+    recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
 
@@ -81,8 +81,8 @@ def password_reset_send_email(email):
     }
     subject = "パスワード再設定について"
     message = message_template.render(context)
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = ([email],)
+    from_email = None
+    recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
 
@@ -95,8 +95,8 @@ def email_reset_send_email(email):
     }
     subject = "メール再設定について"
     message = message_template.render(context)
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = ([email],)
+    from_email = None
+    recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
 
