@@ -45,13 +45,13 @@ class HomeView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        video = Video.objects.all().order_by("-uploaded_date")
+        video = Video.objects.all().order_by("-uploaded_at")
         context["videos"] = video
         return context
 
 
 def generate_random_code(email):
-    random_number = random.randrange(1000, 9999)
+    random_number = "{:0>4}".format(random.randrange(10000))
     AuthenticationCode.objects.update_or_create(
         email=email, defaults={"code": random_number, "email": email}
     )
@@ -67,8 +67,8 @@ def registration_send_email(email):
     }
     subject = "Video Appの本登録について"
     message = message_template.render(context)
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = ([email],)
+    from_email = None
+    recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
 
@@ -81,8 +81,8 @@ def password_reset_send_email(email):
     }
     subject = "パスワード再設定について"
     message = message_template.render(context)
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = ([email],)
+    from_email = None
+    recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
 
@@ -95,14 +95,14 @@ def email_reset_send_email(email):
     }
     subject = "メール再設定について"
     message = message_template.render(context)
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = ([email],)
+    from_email = None
+    recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
 
 def generate_token(email):
-    str = email
-    token = hashlib.sha1(str.encode("utf-8")).hexdigest()
+    email_text = email
+    token = hashlib.sha256(email_text.encode("utf-8")).hexdigest()
     return token
 
 
@@ -143,10 +143,14 @@ class TempRegistrationDoneView(FormView):
         email = self.request.session.get("signup_email")
         token = generate_token(email)
         input_code = self.request.POST["code"]
-        authentication_code = AuthenticationCode.objects.get(email=email).code
+        authentication_code_obj = AuthenticationCode.objects.get(email=email)
+        authentication_code = authentication_code_obj.code
         context = {"token": token, "form": form, "email": email}
-        if int(input_code) == authentication_code:
-            return redirect("signup", token)
+        if input_code == authentication_code:
+            if authentication_code_obj.is_valid():
+                return redirect("signup", token)
+            else:
+                messages.error(self.request, "この認証コードは無効です。新しい認証コードを発行してください。")
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/temp_registration_done.html", context)
@@ -213,10 +217,14 @@ class PasswordResetConfirmationView(FormView):
         email = self.request.session.get("password_reset_email")
         token = generate_token(email)
         input_code = self.request.POST.get("code")
-        authentication_code = AuthenticationCode.objects.get(email=email).code
         context = {"token": token, "form": form, "email": email}
-        if int(input_code) == authentication_code:
-            return redirect("password_reset", token)
+        authentication_code_obj = AuthenticationCode.objects.get(email=email)
+        authentication_code = authentication_code_obj.code
+        if input_code == authentication_code:
+            if authentication_code_obj.is_valid():
+                return redirect("password_reset", token)
+            else:
+                messages.error(self.request, "この認証コードは無効です。新しい認証コードを発行してください。")
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/password_reset_confirmation.html", context)
@@ -252,7 +260,7 @@ class PasswordResetView(FormView):
         return context
 
 
-class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
+class PasswordChangeView(auth_views.PasswordChangeView):
     template_name = "main/password_change.html"
     form_class = PasswordChangeForm
 
@@ -296,13 +304,16 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
         new_email = self.request.session["email_reset_email"]
         token = generate_token(new_email)
         input_code = self.request.POST.get("code")
-        authentication_code = AuthenticationCode.objects.get(email=new_email).code
+        authentication_code_obj = AuthenticationCode.objects.get(email=new_email)
+        authentication_code = authentication_code_obj.code
         context = {"token": token, "form": form, "email": new_email}
-        if int(input_code) == authentication_code:
-            # メールアドレスの変更
-            user = User.objects.filter(id=self.request.user.id)
-            user.update(email=new_email)
-            return redirect("account", self.request.user.id)
+        if input_code == authentication_code:
+            if authentication_code_obj.is_valid():
+                user = User.objects.filter(id=self.request.user.id)
+                user.update(email=new_email)
+                return redirect("account", self.request.user.id)
+            else:
+                messages.error(self.request, "この認証コードは無効です。新しい認証コードを発行してください。")
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/email_reset_confirmation.html", context)
@@ -328,7 +339,6 @@ class AccountView(LoginRequiredMixin, DetailView):
     model = User
 
     def get(self, request, **kwargs):
-        form = ProfileChangeForm(instance=request.user)
         return super().get(request, **kwargs)
 
     def post(self, request, **kwargs):
@@ -342,7 +352,7 @@ class AccountView(LoginRequiredMixin, DetailView):
         queryset = (
             User.objects.filter(pk=self.kwargs["pk"])
             .prefetch_related(
-                Prefetch("video", queryset=Video.objects.order_by("-uploaded_date"))
+                Prefetch("video", queryset=Video.objects.order_by("-uploaded_at"))
             )
             .annotate(
                 follower_count=Count("followed", distinct=True),
@@ -436,10 +446,6 @@ class PlayVideoView(LoginRequiredMixin, DetailView):
             queryset.update(views_count=views)
         return queryset
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
 
 class SearchVideoView(LoginRequiredMixin, ListView):
     template_name = "main/video_search.html"
@@ -465,5 +471,5 @@ class SearchVideoView(LoginRequiredMixin, ListView):
         if self.request.GET.get("btnType") == "favorite":
             queryset = queryset.order_by("-views_count")
         else:
-            queryset = queryset.order_by("-uploaded_date")
+            queryset = queryset.order_by("-uploaded_at")
         return queryset

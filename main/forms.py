@@ -68,11 +68,6 @@ class EmailAuthenticationForm(forms.Form):
 
 
 class EmailForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["email"].widget.attrs["class"] = "form"
-        self.fields["email"].widget.attrs["placeholder"] = "メールアドレス"
-
     # 既に本登録されているユーザーは排除する
     def clean_email(self):
         email = self.cleaned_data["email"]
@@ -84,17 +79,20 @@ class EmailForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ("email",)
+        widgets = {
+            "email": forms.TextInput(attrs={"class": "form", "placeholder": "メールアドレス"})
+        }
 
 
 class RegistrationCodeForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["code"].widget.attrs["class"] = "form"
-        self.fields["code"].widget.attrs["placeholder"] = "認証コード(数字4ケタ)"
-
     class Meta:
         model = AuthenticationCode
         fields = ("code",)
+        widgets = {
+            "code": forms.TextInput(
+                attrs={"class": "form", "placeholder": "認証コード(数字4ケタ)"}
+            )
+        }
 
 
 class PasswordChangeForm(PasswordChangeForm):
@@ -109,15 +107,14 @@ class PasswordChangeForm(PasswordChangeForm):
 
 
 class PasswordForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=PasswordInput(
-            attrs={"autofocus": True, "placeholder": "パスワード", "class": "form"}
-        ),
-    )
-
     class Meta:
         model = User
         fields = ("password",)
+        widgets = {
+            "password": forms.PasswordInput(
+                attrs={"autofocus": True, "placeholder": "パスワード", "class": "form"}
+            )
+        }
 
 
 class PasswordResetEmailForm(forms.Form):
@@ -126,17 +123,6 @@ class PasswordResetEmailForm(forms.Form):
             attrs={"autofocus": True, "placeholder": "メールアドレス", "class": "form"}
         ),
     )
-
-
-class PasswordResetConfirmationForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["code"].widget.attrs["class"] = "form"
-        self.fields["code"].widget.attrs["placeholder"] = "認証コード(数字4ケタ)"
-
-    class Meta:
-        model = AuthenticationCode
-        fields = ("code",)
 
 
 class PasswordResetForm(forms.Form):
@@ -153,8 +139,6 @@ class PasswordResetForm(forms.Form):
     def clean(self):
         new_password1 = self.cleaned_data["new_password1"]
         new_password2 = self.cleaned_data["new_password2"]
-        if len(new_password1) < 6:
-            raise ValidationError("6文字以上にしてください")
         if new_password1 != new_password2:
             raise ValidationError("パスワードが一致しません")
 
@@ -171,24 +155,30 @@ class ProfileChangeForm(forms.ModelForm):
 
 
 class VideoUploadForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["title"].widget.attrs["class"] = "title-form"
-        self.fields["title"].widget.attrs["placeholder"] = "タイトルを入力"
-        self.fields["title"].widget.attrs["onkeyup"] = "ShowTitleLength(value);"
-        self.fields["title"].widget.attrs["rows"] = "2"
-        self.fields["description"].widget.attrs["class"] = "description-form"
-        self.fields["description"].widget.attrs["placeholder"] = "詳細文を入力"
-        self.fields["description"].widget.attrs[
-            "onkeyup"
-        ] = "ShowDescriptionLength(value);"
-        self.fields["video"].widget.attrs["class"] = "video-form"
-        self.fields["video"].widget.attrs["accept"] = "video/*"
-        self.fields["thumbnail"].widget.attrs["class"] = "thumbnail-form"
-
     class Meta:
         model = Video
         fields = ("title", "description", "thumbnail", "video")
+        widgets = {
+            "title": forms.Textarea(
+                attrs={
+                    "class": "title-form",
+                    "placeholder": "タイトルを入力",
+                    "onkeyup": "ShowTitleLength(value);",
+                    "rows": "2",
+                }
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "description-form",
+                    "placeholder": "タイトルを入力",
+                    "onkeyup": "ShowDescriptionLength(value);",
+                }
+            ),
+            "video": forms.FileInput(
+                attrs={"class": "video-form", "accept": "video/*"}
+            ),
+            "thumbnail": forms.FileInput(attrs={"class": "thumbnail-form"}),
+        }
 
 
 class VideoSearchForm(forms.Form):

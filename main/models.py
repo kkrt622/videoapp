@@ -10,7 +10,7 @@ import uuid
 class User(AbstractUser):
     email = models.EmailField("メールアドレス", unique=True)
     username = models.CharField("ユーザ名", max_length=50, default="ゲスト", unique=False)
-    profile = models.TextField("プロフィール", max_length=500, null=True)
+    profile = models.TextField("プロフィール", max_length=500)
     icon = models.ImageField("アイコン", upload_to="icon/", blank=True)
     follow = models.ManyToManyField("User", related_name="followed", symmetrical=False)
 
@@ -30,12 +30,19 @@ class User(AbstractUser):
 
 
 class AuthenticationCode(models.Model):
-    code = models.IntegerField()
+    code = models.CharField("認証コード", max_length=4)
     email = models.EmailField("メールアドレス", unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name_plural = "認証コード"
+
+    def is_valid(self):
+        elapsed_time = timezone.now() - self.updated_at
+        if elapsed_time.seconds > 30:
+            return False
+        return True
 
 
 def video_directory_path(instance, filename):
@@ -44,10 +51,10 @@ def video_directory_path(instance, filename):
 
 class Video(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="video")
-    title = models.TextField("タイトル", max_length=50)
+    title = models.CharField("タイトル", max_length=50)
     description = models.TextField("説明", max_length=500)
     thumbnail = models.ImageField("サムネイル", upload_to="thumbnail/")
-    uploaded_date = models.DateTimeField("動画投稿時刻", auto_now_add=True)
+    uploaded_at = models.DateTimeField("動画投稿時刻", auto_now_add=True)
     video = models.FileField("ビデオファイル", upload_to=video_directory_path)
     views_count = models.IntegerField("視聴回数", default=0)
 
@@ -58,7 +65,7 @@ class Video(models.Model):
         return os.path.basename(self.video.name).split(".")[0]
 
     def get_elapsed_time(self):
-        delta = timezone.now() - self.uploaded_date
+        delta = timezone.now() - self.uploaded_at
 
         zero = timedelta()
         one_hour = timedelta(hours=1)
