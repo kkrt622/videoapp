@@ -17,7 +17,7 @@ from django.views.generic import (
 )
 from django.core.mail import send_mail
 from django.template.loader import get_template
-from django.conf import settings
+from django.core import signing
 from django.urls import reverse_lazy, reverse
 from .models import AuthenticationCode, Video
 import random
@@ -35,8 +35,6 @@ from .forms import (
 )
 from django.db.models import Count, Case, When, Prefetch
 from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-import hashlib
 
 User = get_user_model()
 
@@ -46,13 +44,13 @@ class HomeView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        video = Video.objects.all().order_by("-uploaded_date")
+        video = Video.objects.all().order_by("-uploaded_at")
         context["videos"] = video
         return context
 
 
 def generate_random_code(email):
-    random_number = random.randrange(1000, 9999)
+    random_number = "{:0>4}".format(random.randrange(10000))
     AuthenticationCode.objects.update_or_create(
         email=email, defaults={"code": random_number, "email": email}
     )
@@ -68,8 +66,8 @@ def registration_send_email(email):
     }
     subject = "Video Appの本登録について"
     message = message_template.render(context)
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = ([email],)
+    from_email = None
+    recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
 
@@ -82,8 +80,8 @@ def password_reset_send_email(email):
     }
     subject = "パスワード再設定について"
     message = message_template.render(context)
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = ([email],)
+    from_email = None
+    recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
 
@@ -96,16 +94,9 @@ def email_reset_send_email(email):
     }
     subject = "メール再設定について"
     message = message_template.render(context)
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = ([email],)
+    from_email = None
+    recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
-
-
-def generate_token(email):
-    dt = timezone.now()
-    str = email
-    token = hashlib.sha1(str.encode("utf-8")).hexdigest()
-    return token
 
 
 class LoginView(LoginView):
@@ -120,9 +111,9 @@ class TempRegistrationView(FormView):
     model = User
 
     def form_valid(self, form):
-        email = self.request.POST.get("email")
+        email = form.cleaned_data["email"]
         # トークンの生成
-        token = generate_token(email)
+        token = signing.dumps(email)
         # メール送信
         registration_send_email(email)
         # 送信内容をセッションに保存する
@@ -136,6 +127,13 @@ class TempRegistrationDoneView(FormView):
     model = AuthenticationCode
 
     def get(self, request, **kwargs):
+        token = self.kwargs["token"]
+        try:
+            signing.loads(token)
+        except signing.BadSignature:
+            messages.error(self.request, "無効なURLです。もう一度やり直してください")
+            return redirect("temp_registration")
+
         if "email" in self.request.GET:
             email = self.request.GET.get("email")
             registration_send_email(email)
@@ -143,12 +141,16 @@ class TempRegistrationDoneView(FormView):
 
     def form_valid(self, form):
         email = self.request.session.get("signup_email")
-        token = generate_token(email)
-        input_code = self.request.POST["code"]
-        authentication_code = AuthenticationCode.objects.get(email=email).code
-        context = {"token": token, "form": form, "email": email}
-        if int(input_code) == authentication_code:
-            return redirect("signup", token)
+        token = signing.dumps(email)
+        input_code = form.cleaned_data["code"]
+        authentication_code_obj = AuthenticationCode.objects.get(email=email)
+        authentication_code = authentication_code_obj.code
+        context = {"form": form, "email": email}
+        if input_code == authentication_code:
+            if authentication_code_obj.is_valid():
+                return redirect("signup", token)
+            else:
+                messages.error(self.request, "この認証コードは無効です。新しい認証コードを発行してください。")
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/temp_registration_done.html", context)
@@ -156,9 +158,7 @@ class TempRegistrationDoneView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         email = self.request.session["signup_email"]
-        token = generate_token(email)
         context["email"] = email
-        context["token"] = token
         return context
 
 
@@ -167,6 +167,15 @@ class SignUpView(FormView):
     form_class = PasswordForm
     model = User
     success_url = reverse_lazy("login")
+
+    def get(self, request, **kwargs):
+        token = self.kwargs["token"]
+        try:
+            signing.loads(token)
+        except signing.BadSignature:
+            messages.error(self.request, "無効なURLです。もう一度やり直してください")
+            return redirect("temp_registration")
+        return super().get(request, **kwargs)
 
     def form_valid(self, form, **kwargs):
         email = self.request.session["signup_email"]
@@ -179,10 +188,7 @@ class SignUpView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         email = self.request.session["signup_email"]
-        token = generate_token(email)
         context["email"] = email
-        context["token"] = token
-
         return context
 
 
@@ -191,9 +197,9 @@ class PasswordResetEmailView(FormView):
     form_class = PasswordResetEmailForm
     model = User
 
-    def form_valid(self):
-        email = self.request.POST.get("email")
-        token = generate_token(email)
+    def form_valid(self, form):
+        email = form.cleaned_data["email"]
+        token = signing.dumps(email)
         # メール送信
         password_reset_send_email(email)
         # 送信内容をセッションに保存する
@@ -207,6 +213,13 @@ class PasswordResetConfirmationView(FormView):
     model = AuthenticationCode
 
     def get(self, request, **kwargs):
+        token = self.kwargs["token"]
+        try:
+            signing.loads(token)
+        except signing.BadSignature:
+            messages.error(self.request, "無効なURLです。もう一度やり直してください")
+            return redirect("temp_registration")
+
         if "email" in self.request.GET:
             email = self.request.GET.get("email")
             registration_send_email(email)
@@ -214,12 +227,16 @@ class PasswordResetConfirmationView(FormView):
 
     def form_valid(self, form):
         email = self.request.session.get("password_reset_email")
-        token = generate_token(email)
-        input_code = self.request.POST.get("code")
-        authentication_code = AuthenticationCode.objects.get(email=email).code
-        context = {"token": token, "form": form, "email": email}
-        if int(input_code) == authentication_code:
-            return redirect("password_reset", token)
+        token = signing.dumps(email)
+        input_code = form.cleaned_data["code"]
+        context = {"form": form, "email": email}
+        authentication_code_obj = AuthenticationCode.objects.get(email=email)
+        authentication_code = authentication_code_obj.code
+        if input_code == authentication_code:
+            if authentication_code_obj.is_valid():
+                return redirect("password_reset", token)
+            else:
+                messages.error(self.request, "この認証コードは無効です。新しい認証コードを発行してください。")
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/password_reset_confirmation.html", context)
@@ -227,9 +244,7 @@ class PasswordResetConfirmationView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         email = self.request.session["password_reset_email"]
-        token = generate_token(email)
         context["email"] = email
-        context["token"] = token
         return context
 
 
@@ -237,6 +252,15 @@ class PasswordResetView(FormView):
     template_name = "main/password_reset.html"
     form_class = PasswordResetForm
     success_url = reverse_lazy("login")
+
+    def get(self, request, **kwargs):
+        token = self.kwargs["token"]
+        try:
+            signing.loads(token)
+        except signing.BadSignature:
+            messages.error(self.request, "無効なURLです。もう一度やり直してください")
+            return redirect("temp_registration")
+        return super().get(request, **kwargs)
 
     def form_valid(self, form, **kwargs):
         email = self.request.session["password_reset_email"]
@@ -249,13 +273,11 @@ class PasswordResetView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         email = self.request.session["password_reset_email"]
-        token = generate_token(email)
         context["email"] = email
-        context["token"] = token
         return context
 
 
-class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
+class PasswordChangeView(auth_views.PasswordChangeView):
     template_name = "main/password_change.html"
     form_class = PasswordChangeForm
 
@@ -269,8 +291,8 @@ class EmailResetView(LoginRequiredMixin, FormView):
     model = User
 
     def form_valid(self, form):
-        new_email = self.request.POST.get("email")
-        token = generate_token(new_email)
+        new_email = form.cleaned_data["email"]
+        token = signing.dumps(new_email)
         # メール送信
         email_reset_send_email(new_email)
         self.request.session["email_reset_email"] = new_email
@@ -290,6 +312,13 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
     model = AuthenticationCode
 
     def get(self, request, **kwargs):
+        token = self.kwargs["token"]
+        try:
+            signing.loads(token)
+        except signing.BadSignature:
+            messages.error(self.request, "無効なURLです。もう一度やり直してください")
+            return redirect("temp_registration")
+
         if "email" in self.request.GET:
             email = self.request.GET.get("email")
             registration_send_email(email)
@@ -297,15 +326,18 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         new_email = self.request.session["email_reset_email"]
-        token = generate_token(new_email)
-        input_code = self.request.POST.get("code")
-        authentication_code = AuthenticationCode.objects.get(email=new_email).code
-        context = {"token": token, "form": form, "email": new_email}
-        if int(input_code) == authentication_code:
-            # メールアドレスの変更
-            user = User.objects.filter(id=self.request.user.id)
-            user.update(email=new_email)
-            return redirect("account", self.request.user.id)
+        token = signing.dumps(new_email)
+        input_code = form.cleaned_data["code"]
+        authentication_code_obj = AuthenticationCode.objects.get(email=new_email)
+        authentication_code = authentication_code_obj.code
+        context = {"form": form, "email": new_email}
+        if input_code == authentication_code:
+            if authentication_code_obj.is_valid():
+                user = User.objects.filter(id=self.request.user.id)
+                user.update(email=new_email)
+                return redirect("account", self.request.user.id)
+            else:
+                messages.error(self.request, "この認証コードは無効です。新しい認証コードを発行してください。")
         else:
             messages.error(self.request, "認証コードが正しくありません")
         return render(self.request, "main/email_reset_confirmation.html", context)
@@ -313,9 +345,7 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         new_email = self.request.session["email_reset_email"]
-        token = generate_token(new_email)
         context["email"] = new_email
-        context["token"] = token
         return context
 
 
@@ -331,7 +361,6 @@ class AccountView(LoginRequiredMixin, DetailView):
     model = User
 
     def get(self, request, **kwargs):
-        form = ProfileChangeForm(instance=request.user)
         return super().get(request, **kwargs)
 
     def post(self, request, **kwargs):
@@ -345,7 +374,7 @@ class AccountView(LoginRequiredMixin, DetailView):
         queryset = (
             User.objects.filter(pk=self.kwargs["pk"])
             .prefetch_related(
-                Prefetch("video", queryset=Video.objects.order_by("-uploaded_date"))
+                Prefetch("video", queryset=Video.objects.order_by("-uploaded_at"))
             )
             .annotate(
                 follower_count=Count("followed", distinct=True),
@@ -420,10 +449,9 @@ class VideoUploadView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy("home")
 
     def form_valid(self, form):
-        data = form.cleaned_data
-        obj = Video(**data)
-        obj.user = self.request.user
-        obj.save()
+        video = form.save(commit=False)
+        video.user = self.request.user
+        video.save()
         return super().form_valid(form)
 
 
@@ -438,10 +466,6 @@ class PlayVideoView(LoginRequiredMixin, DetailView):
             views = self.request.GET.get("views")
             queryset.update(views_count=views)
         return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
 
 
 class SearchVideoView(LoginRequiredMixin, ListView):
@@ -468,5 +492,5 @@ class SearchVideoView(LoginRequiredMixin, ListView):
         if self.request.GET.get("btnType") == "favorite":
             queryset = queryset.order_by("-views_count")
         else:
-            queryset = queryset.order_by("-uploaded_date")
+            queryset = queryset.order_by("-uploaded_at")
         return queryset
