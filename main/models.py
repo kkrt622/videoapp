@@ -45,8 +45,10 @@ class AuthenticationCode(models.Model):
         return True
 
 
-def video_directory_path(instance, filename):
-    return "uploaded_video/{}.{}".format(str(uuid.uuid4()), filename.split(".")[-1])
+def video_directory_path(instace, filename):
+    return "uploaded_video/{}{}".format(
+        str(uuid.uuid4()), os.path.splitext(filename)[1]
+    )
 
 
 class Video(models.Model):

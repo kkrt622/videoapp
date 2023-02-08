@@ -20,7 +20,7 @@
 
 {% block content %}
 <div class="email-reset-form-container">
-    <form action="{% url 'email_reset_confirmation' user.id %}" method="POST" class="email-reset-form">
+    <form method="POST" class="email-reset-form">
         {% csrf_token %}
         <p class="email-reset-form-text">{{email}}に数字4桁の認証コードを送信しました。<br>下のテキストボックスに記入してください。</p>
         {% for message in messages %}
