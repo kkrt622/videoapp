@@ -118,7 +118,7 @@ class TempRegistrationView(FormView):
     model = User
 
     def form_valid(self, form):
-        email = self.request.POST.get("email")
+        email = form.cleaned_data["email"]
         # トークンの生成
         token = generate_token(email)
         # メール送信
@@ -142,7 +142,7 @@ class TempRegistrationDoneView(FormView):
     def form_valid(self, form):
         email = self.request.session.get("signup_email")
         token = generate_token(email)
-        input_code = self.request.POST["code"]
+        input_code = form.cleaned_data["code"]
         authentication_code_obj = AuthenticationCode.objects.get(email=email)
         authentication_code = authentication_code_obj.code
         context = {"token": token, "form": form, "email": email}
@@ -193,7 +193,7 @@ class PasswordResetEmailView(FormView):
     model = User
 
     def form_valid(self, form):
-        email = self.request.POST.get("email")
+        email = form.cleaned_data["email"]
         token = generate_token(email)
         # メール送信
         password_reset_send_email(email)
@@ -216,7 +216,7 @@ class PasswordResetConfirmationView(FormView):
     def form_valid(self, form):
         email = self.request.session.get("password_reset_email")
         token = generate_token(email)
-        input_code = self.request.POST.get("code")
+        input_code = form.cleaned_data["code"]
         context = {"token": token, "form": form, "email": email}
         authentication_code_obj = AuthenticationCode.objects.get(email=email)
         authentication_code = authentication_code_obj.code
@@ -274,7 +274,7 @@ class EmailResetView(LoginRequiredMixin, FormView):
     model = User
 
     def form_valid(self, form):
-        new_email = self.request.POST.get("email")
+        new_email = form.cleaned_data["email"]
         token = generate_token(new_email)
         # メール送信
         email_reset_send_email(new_email)
@@ -303,7 +303,7 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         new_email = self.request.session["email_reset_email"]
         token = generate_token(new_email)
-        input_code = self.request.POST.get("code")
+        input_code = form.cleaned_data["code"]
         authentication_code_obj = AuthenticationCode.objects.get(email=new_email)
         authentication_code = authentication_code_obj.code
         context = {"token": token, "form": form, "email": new_email}
