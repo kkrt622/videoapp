@@ -14,6 +14,7 @@ from django.views.generic import (
     DetailView,
     ListView,
     DeleteView,
+    UpdateView,
 )
 from django.core.mail import send_mail
 from django.template.loader import get_template
@@ -32,9 +33,11 @@ from .forms import (
     ProfileChangeForm,
     VideoUploadForm,
     VideoSearchForm,
+    VideoUpdateForm,
 )
 from django.db.models import Count, Case, When, Prefetch
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 User = get_user_model()
 
@@ -494,3 +497,18 @@ class SearchVideoView(LoginRequiredMixin, ListView):
         else:
             queryset = queryset.order_by("-uploaded_at")
         return queryset
+
+
+class VideoUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = "main/video_update.html"
+    model = Video
+    form_class = VideoUpdateForm
+
+    def get_success_url(self):
+        return reverse("account", kwargs={"pk": self.request.user.pk})
+
+
+@require_POST
+def video_delete(request, pk):
+    Video.objects.filter(pk=pk).delete()
+    return redirect("account", pk)

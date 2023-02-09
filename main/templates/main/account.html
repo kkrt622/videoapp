@@ -42,10 +42,6 @@
         {% endif %}
     </div>
     {% endif %}
-    <div class="account-video-btns">
-        <button class="search-button active">新着の動画</button>
-        <button class="search-button">人気の動画</button>
-    </div>
     <div class="video-container">
 
         {% for video in object.video.all %}
@@ -65,8 +61,8 @@
                     </div>
                 </div>
             </a>
-            <div class="">
-                <i class="fas fa-ellipsis-v"></i>
+            <div>
+                <a href="{% url 'video_update' video.pk %}"><i class="fas fa-pencil-alt"></i></a>
             </div>
         </div>
         {% empty %}
@@ -100,7 +96,7 @@
                 <p class="edit-username-counter"><span id="edit-username-count">0</span>/50</p>
             </div>
             {{ form.username }}
-            <div class="edit-profile-contaier">
+            <div class="edit-profile-container">
                 <div class="edit-profile-text">
                     {{ form.profile.label }}
                 </div>
