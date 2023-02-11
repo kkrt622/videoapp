@@ -27,16 +27,3 @@ document.addEventListener("DOMContentLoaded", function () {
     })
 })
 
-// ポップアップウィンドウの表示
-const deleteFormWindow = document.querySelector(".delete-form-container")
-const cancelBtn = document.querySelector(".cancel-btn")
-const openBtn = document.querySelector(".delete-btn")
-const updateFormWindow = document.querySelector(".update-form-container")
-
-openBtn.addEventListener("click", function () {
-    deleteFormWindow.classList.toggle("closed")
-})
-
-cancelBtn.addEventListener("click", function () {
-    deleteFormWindow.classList.toggle("closed")
-})
