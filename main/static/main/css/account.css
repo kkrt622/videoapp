@@ -403,15 +403,29 @@ input[type=radio].account-video-btn {
 
 .email-change i,
 .password-change i,
+.feedback i {
+    width: 10%;
+    text-align: center;
+}
 
 .email-change-text,
 .password-change-text,
+.feedback-text {
+    display: flex;
+    justify-content: space-between;
+    width: 85%;
+}
 
 .password-change-text a {
     margin: 16px 0;
 }
 
 .password-change,
+.feedback {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
 
 .rules {
     display: flex;
