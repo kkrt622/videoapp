@@ -20,6 +20,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="overlay"></div>
 <div class="update-form-container">
     <form method="POST" class="update-form" enctype="multipart/form-data">
         {% csrf_token %}
@@ -33,22 +34,22 @@
                 {{ form.thumbnail }}
             </label>
         </div>
+        <div class="title-form-field inner-block">
+            <div class="title-form-lead">
+                <label class="title-form-label" for="{{form.title.label}}">タイトル</label>
+                <p class="title-form-counter"><span id="title-form-count">0</span>/50</p>
+            </div>
+            {{ form.title }}
+        </div>
+        <hr>
+        <div class="description-form-field inner-block">
+            <div class="description-form-lead">
+                <label for="{{form.description.label}}">詳細文</label>
+                <p class="description-form-counter"><span id="description-form-count">0</span>/500</p>
+            </div>
+            {{ form.description }}
+        </div>
         <div class="inner-block">
-            <div class="title-form-field">
-                <div class="title-form-lead">
-                    <label class="title-form-label" for="{{form.title.label}}">タイトル</label>
-                    <p class="title-form-counter"><span id="title-form-count">0</span>/50</p>
-                </div>
-                {{ form.title }}
-            </div>
-            <hr>
-            <div class="description-form-field">
-                <div class="description-form-lead">
-                    <label for="{{form.description.label}}">詳細文</label>
-                    <p class="description-form-counter"><span id="description-form-count">0</span>/500</p>
-                </div>
-                {{ form.description }}
-            </div>
             <button type="submit" class="update-form-btn">保存</button>
         </div>
     </form>

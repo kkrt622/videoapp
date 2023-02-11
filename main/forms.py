@@ -176,7 +176,12 @@ class VideoUploadForm(forms.ModelForm):
                 }
             ),
             "video": forms.FileInput(
-                attrs={"class": "video-form", "accept": "video/*"}
+                attrs={
+                    "class": "video-form",
+                    "accept": "video/*",
+                    "onchange": "VideoPreview(this);",
+                    "id": "video-upload-btn",
+                }
             ),
         }
 

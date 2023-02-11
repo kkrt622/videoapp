@@ -35,10 +35,8 @@ const updateFormWindow = document.querySelector(".update-form-container")
 
 openBtn.addEventListener("click", function () {
     deleteFormWindow.classList.toggle("closed")
-    updateFormWindow.classList.toggle("closed")
 })
 
 cancelBtn.addEventListener("click", function () {
     deleteFormWindow.classList.toggle("closed")
-    updateFormWindow.classList.toggle("closed")
 })
