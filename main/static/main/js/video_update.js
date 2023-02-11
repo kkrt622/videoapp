@@ -27,3 +27,21 @@ document.addEventListener("DOMContentLoaded", function () {
     })
 })
 
+// ポップアップウィンドウの表示
+const deleteFormWindow = document.querySelector(".delete-form-container")
+const updateFormWindow = document.querySelector(".update-form-container")
+const overlay = document.querySelector(".overlay")
+const cancelBtn = document.querySelector(".cancel-btn")
+const openBtn = document.querySelector(".delete-btn")
+
+openBtn.addEventListener("click", function () {
+    deleteFormWindow.classList.toggle("closed")
+    updateFormWindow.classList.toggle("closed")
+    overlay.classList.toggle("closed")
+})
+
+cancelBtn.addEventListener("click", function () {
+    deleteFormWindow.classList.toggle("closed")
+    updateFormWindow.classList.toggle("closed")
+    overlay.classList.toggle("closed")
+})

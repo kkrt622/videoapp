@@ -62,8 +62,8 @@ h1 {
     display: flex;
     width: 100%;
     height: 64px;
-    border-top: 1px solid #9b9b9b;
-    background-color: #eee;
+    background-color: rgba(249, 249, 249, 0.79);
+    backdrop-filter: blur(67.955px);
 }
 
 .footer__item {
