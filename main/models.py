@@ -67,6 +67,11 @@ class Video(models.Model):
     def file_name(self):
         return os.path.basename(self.video.name).split(".")[0]
 
+    def thumbnail_url(self):
+        if self.thumbnail:
+            return self.thumbnail.url
+        return static("main/img/default-icon.png")
+
     def get_elapsed_time(self):
         delta = timezone.now() - self.uploaded_at
 
