@@ -28,7 +28,7 @@
         <div class="update-form-error">{{form.email.errors}}</div>
         {% endif %}
         <div class="thumbnail-form-field">
-            <img class="thumbnail-preview" src="{% static 'main/img/sample.jpeg' %}">
+            <img class="thumbnail-preview" src="{{video.thumbnail_url}}">
             <label>
                 <i class="far fa-images"></i>
                 {{ form.thumbnail }}

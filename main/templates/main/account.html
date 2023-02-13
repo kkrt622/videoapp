@@ -48,7 +48,7 @@
         <div class="video-list-container">
             <a class="video-information-container" href="{% url 'video_play' video.id %}">
                 <div class="video-thumbnail-wrapper">
-                    <img src="{% static 'main/img/sample.jpeg' %}">
+                    <img src="{{video.thumbnail_url}}">
                 </div>
                 <div class="video-detail-container">
                     <div class="text-wrapper">
@@ -84,7 +84,7 @@
             <div class="edit-icon">
                 {{ form.icon }}
                 <div class="account__icon">
-                    <img id="preview" src="{% static 'main/img/default-icon.png' %}">
+                    <img id="preview" src="{{object.icon_url}}">
                 </div>
                 <i class="fa-regular fa-image"></i>
             </div>

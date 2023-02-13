@@ -1,10 +1,11 @@
-from django.contrib.auth.models import AbstractUser
-from django.db import models
 from datetime import timedelta
-from django.utils import timezone
-from django.templatetags.static import static
 import os
 import uuid
+
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.templatetags.static import static
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -65,6 +66,11 @@ class Video(models.Model):
 
     def file_name(self):
         return os.path.basename(self.video.name).split(".")[0]
+
+    def thumbnail_url(self):
+        if self.thumbnail:
+            return self.thumbnail.url
+        return static("main/img/default-icon.png")
 
     def get_elapsed_time(self):
         delta = timezone.now() - self.uploaded_at
