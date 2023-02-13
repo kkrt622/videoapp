@@ -1,10 +1,11 @@
-from django.contrib.auth.models import AbstractUser
-from django.db import models
 from datetime import timedelta
-from django.utils import timezone
-from django.templatetags.static import static
 import os
 import uuid
+
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.templatetags.static import static
+from django.utils import timezone
 
 
 class User(AbstractUser):

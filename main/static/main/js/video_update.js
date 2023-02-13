@@ -1,10 +1,10 @@
 "use strict";
 
 // 文字数カウント機能
-var title = document.getElementById("id_title");
-var description = document.getElementById("id_description");
-var title_count = document.getElementById("title-form-count");
-var description_count = document.getElementById("description-form-count");
+const title = document.getElementById("id_title");
+const description = document.getElementById("id_description");
+const title_count = document.getElementById("title-form-count");
+const description_count = document.getElementById("description-form-count");
 
 // 入力前文字数
 title_count.textContent = title.value.length;
@@ -18,11 +18,11 @@ description.addEventListener("keyup", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-    var thumbnailSample = document.querySelector(".thumbnail-form")
+    const thumbnailSample = document.querySelector(".thumbnail-form")
     thumbnailSample.addEventListener("change", function (ev) {
-        var image = ev.target.files[0];
-        var imageURL = window.URL.createObjectURL(image);
-        var sampleImage = document.querySelector(".thumbnail-preview");
+        const image = ev.target.files[0];
+        const imageURL = window.URL.createObjectURL(image);
+        const sampleImage = document.querySelector(".thumbnail-preview");
         sampleImage.src = imageURL
     })
 })

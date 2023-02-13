@@ -1,12 +1,11 @@
-from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model, authenticate
 from django import forms
+from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import PasswordChangeForm
-from .models import AuthenticationCode, Video
 from django.core.exceptions import ValidationError
-from django.forms.widgets import PasswordInput
-from django.utils.translation import gettext_lazy as _
 from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as _
+
+from .models import AuthenticationCode, Video
 
 User = get_user_model()
 
@@ -127,10 +126,10 @@ class PasswordResetEmailForm(forms.Form):
 
 class PasswordResetForm(forms.Form):
     new_password1 = forms.CharField(
-        widget=PasswordInput({"placeholder": "新しいパスワード", "class": "form"})
+        widget=forms.PasswordInput({"placeholder": "新しいパスワード", "class": "form"})
     )
     new_password2 = forms.CharField(
-        widget=PasswordInput({"placeholder": "新しいパスワード(確認)", "class": "form"})
+        widget=forms.PasswordInput({"placeholder": "新しいパスワード(確認)", "class": "form"})
     )
 
     def __init__(self, *args, **kwargs):
