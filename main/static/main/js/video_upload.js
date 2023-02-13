@@ -11,11 +11,25 @@ function ShowDescriptionLength(str) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    var thumbnailSample = document.querySelector(".thumbnail-form")
+
+    // 画像プレビュー
+    const thumbnailSample = document.querySelector(".thumbnail-form")
     thumbnailSample.addEventListener("change", function (ev) {
-        var image = ev.target.files[0];
-        var imageURL = window.URL.createObjectURL(image);
-        var sampleImage = document.querySelector(".thumbnail-preview");
+        const image = ev.target.files[0];
+        const imageURL = window.URL.createObjectURL(image);
+        const sampleImage = document.querySelector(".thumbnail-preview");
         sampleImage.src = imageURL
     })
 })
+
+function VideoPreview(obj) {
+    const videoForm = document.querySelector(".video-form")
+    videoForm.addEventListener("change", function () {
+        const reader = new FileReader()
+        const videoPreview = document.querySelector(".video-preview")
+        reader.addEventListener("load", function () {
+            videoPreview.src = reader.result
+        })
+        reader.readAsDataURL(obj.files[0])
+    })
+}

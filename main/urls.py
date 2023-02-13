@@ -88,5 +88,7 @@ urlpatterns = [
     ),
     path("video_upload", views.VideoUploadView.as_view(), name="video_upload"),
     path("video_play/<int:pk>", views.PlayVideoView.as_view(), name="video_play"),
+    path("video_update/<int:pk>", views.VideoUpdateView.as_view(), name="video_update"),
+    path("video_delete/<int:pk>", views.video_delete, name="video_delete"),
     path("search_video", views.SearchVideoView.as_view(), name="search_video"),
 ]

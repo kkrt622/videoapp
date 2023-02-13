@@ -1,26 +1,31 @@
-from django.shortcuts import render, redirect, get_object_or_404
+import random
+
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import (
     LoginView,
     LogoutView,
 )
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core import signing
+from django.core.mail import send_mail
+from django.db.models import Count, Case, When, Prefetch
+from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import get_template
+from django.urls import reverse_lazy, reverse
+from django.views.decorators.http import require_POST
 from django.views.generic import (
     TemplateView,
     FormView,
     DetailView,
     ListView,
     DeleteView,
+    UpdateView,
 )
-from django.core.mail import send_mail
-from django.template.loader import get_template
-from django.core import signing
-from django.urls import reverse_lazy, reverse
-from .models import AuthenticationCode, Video
-import random
+
 from .forms import (
     EmailAuthenticationForm,
     EmailForm,
@@ -32,9 +37,9 @@ from .forms import (
     ProfileChangeForm,
     VideoUploadForm,
     VideoSearchForm,
+    VideoUpdateForm,
 )
-from django.db.models import Count, Case, When, Prefetch
-from django.contrib.auth.decorators import login_required
+from .models import AuthenticationCode, Video
 
 User = get_user_model()
 
@@ -494,3 +499,18 @@ class SearchVideoView(LoginRequiredMixin, ListView):
         else:
             queryset = queryset.order_by("-uploaded_at")
         return queryset
+
+
+class VideoUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = "main/video_update.html"
+    model = Video
+    form_class = VideoUpdateForm
+
+    def get_success_url(self):
+        return reverse("account", kwargs={"pk": self.request.user.pk})
+
+
+@require_POST
+def video_delete(request, pk):
+    Video.objects.filter(pk=pk).delete()
+    return redirect("account", pk)

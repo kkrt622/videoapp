@@ -42,17 +42,13 @@
         {% endif %}
     </div>
     {% endif %}
-    <div class="account-video-btns">
-        <button class="search-button active">新着の動画</button>
-        <button class="search-button">人気の動画</button>
-    </div>
     <div class="video-container">
 
         {% for video in object.video.all %}
         <div class="video-list-container">
             <a class="video-information-container" href="{% url 'video_play' video.id %}">
                 <div class="video-thumbnail-wrapper">
-                    <img src="{% static 'main/img/sample.jpeg' %}">
+                    <img src="{{video.thumbnail_url}}">
                 </div>
                 <div class="video-detail-container">
                     <div class="text-wrapper">
@@ -65,8 +61,8 @@
                     </div>
                 </div>
             </a>
-            <div class="">
-                <i class="fas fa-ellipsis-v"></i>
+            <div>
+                <a href="{% url 'video_update' video.pk %}"><i class="fas fa-pencil-alt"></i></a>
             </div>
         </div>
         {% empty %}
@@ -78,7 +74,7 @@
 <!-- プロフィール編集画面 -->
 <div class="edit-profile">
     <div class="edit-profile-title-container">
-        <i class="fa-solid fa-xmark edit-profile-close"></i>
+        <i class="fa-solid fa-xmark fa-2x edit-profile-close"></i>
         <h1>プロフィールを編集</h1>
         <button type="submit" form="edit-form">保存</button>
     </div>
@@ -88,7 +84,7 @@
             <div class="edit-icon">
                 {{ form.icon }}
                 <div class="account__icon">
-                    <img id="preview" src="{% static 'main/img/default-icon.png' %}">
+                    <img id="preview" src="{{object.icon_url}}">
                 </div>
                 <i class="fa-regular fa-image"></i>
             </div>
@@ -100,7 +96,7 @@
                 <p class="edit-username-counter"><span id="edit-username-count">0</span>/50</p>
             </div>
             {{ form.username }}
-            <div class="edit-profile-contaier">
+            <div class="edit-profile-container">
                 <div class="edit-profile-text">
                     {{ form.profile.label }}
                 </div>
@@ -114,7 +110,7 @@
 <!-- 設定画面 -->
 <div class="settings">
     <div class="settings-title-container">
-        <i class="fa-solid fa-xmark settings-close"></i>
+        <i class="fa-solid fa-xmark fa-2x settings-close"></i>
         <h1>設定</h1>
     </div>
     <div class="settings-container">
@@ -131,12 +127,6 @@
                 <div class="password-change-text">
                     <a href="{% url 'password_change' %}">パスワードの変更</a>
                 </div>
-            </div>
-        </div>
-        <div class="feedback">
-            <i class="fa-regular fa-comment"></i>
-            <div class="feedback-text">
-                <p>フィードバックを送る</p>
             </div>
         </div>
         <div class="others">
