@@ -2,16 +2,30 @@
     margin: 0 auto;
 }
 
+.upload-btn {
+    color: #2B8F38;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+}
+
 .upload-form-container {
     padding-top: 64px;
 }
 
-.title-form-field {
-    margin-top: 0.75rem;
-}
-
 .thumbnail-form-field {
     position: relative;
+}
+
+.thumbnail-form-field i {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 3px;
+    border-radius: 4px;
 }
 
 .thumbnail-form-field::before {
@@ -26,16 +40,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.thumbnail-form-field i {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 3px;
-    border-radius: 4px;
 }
 
 .thumbnail-form {
@@ -64,6 +68,10 @@
     display: flex;
     align-items: center;
     position: relative;
+}
+
+.title-form-field {
+    margin-top: 0.75rem;
 }
 
 #title-form-length {
@@ -104,21 +112,37 @@
     margin: 0.75rem 0;
 }
 
-.upload-form-btn {
-    width: 100%;
-    height: 36px;
-    background-color: #2B8F38;
-    border: 1px solid #2B8F38;
-    color: white;
-    border-radius: 100vh;
-    margin-bottom: 30px;
+.video-form-lead {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.video-form-label {
+    margin-bottom: 16px;
+}
+
+.video-form-label::after {
+    content: "必須";
+    color: red;
+    padding-left: 0.2rem;
+}
+
+.video-form-field {
+    margin-top: 0.75rem;
 }
 
 .video-upload-btn {
-    padding: 10px 40px;
-    color: #ffffff;
-    background-color: #2B8F38;
+    display: block;
+    width: 100%;
+    height: 36px;
+    line-height: 36px;
+    border: 1px solid #2B8F38;
+    border-radius: 100vh;
+    color: #2B8F38;
+    background-color: white;
     cursor: pointer;
+    text-align: center;
 }
 
 .video-form {

@@ -159,6 +159,7 @@ class VideoUploadForm(forms.ModelForm):
         model = Video
         fields = ("title", "description", "thumbnail", "video")
         widgets = {
+            "thumbnail": forms.FileInput(attrs={"class": "thumbnail-form"}),
             "title": forms.Textarea(
                 attrs={
                     "class": "title-form",
@@ -175,9 +176,13 @@ class VideoUploadForm(forms.ModelForm):
                 }
             ),
             "video": forms.FileInput(
-                attrs={"class": "video-form", "accept": "video/*"}
+                attrs={
+                    "class": "video-form",
+                    "accept": "video/*",
+                    "onchange": "VideoPreview(this);",
+                    "id": "video-upload-btn",
+                }
             ),
-            "thumbnail": forms.FileInput(attrs={"class": "thumbnail-form"}),
         }
 
 
@@ -186,3 +191,23 @@ class VideoSearchForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={"placeholder": "動画を検索", "class": "search-form"}),
     )
+
+
+class VideoUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Video
+        fields = ("title", "description", "thumbnail")
+        widgets = {
+            "thumbnail": forms.FileInput(attrs={"class": "thumbnail-form"}),
+            "title": forms.Textarea(
+                attrs={
+                    "class": "title-form",
+                    "rows": "2",
+                }
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "description-form",
+                }
+            ),
+        }
