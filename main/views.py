@@ -117,12 +117,8 @@ class TempRegistrationView(FormView):
 
     def form_valid(self, form):
         email = form.cleaned_data["email"]
-        # トークンの生成
         token = signing.dumps(email)
-        # メール送信
         registration_send_email(email)
-        # 送信内容をセッションに保存する
-        self.request.session["signup_email"] = email
         return redirect("temp_registration_done", token)
 
 
@@ -144,9 +140,9 @@ class TempRegistrationDoneView(FormView):
             registration_send_email(email)
         return super().get(request, **kwargs)
 
-    def form_valid(self, form):
-        email = self.request.session.get("signup_email")
-        token = signing.dumps(email)
+    def form_valid(self, form, **kwargs):
+        token = self.kwargs["token"]
+        email = signing.loads(token)
         input_code = form.cleaned_data["code"]
         authentication_code_obj = AuthenticationCode.objects.get(email=email)
         authentication_code = authentication_code_obj.code
@@ -162,7 +158,8 @@ class TempRegistrationDoneView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        email = self.request.session["signup_email"]
+        token = self.kwargs["token"]
+        email = signing.loads(token)
         context["email"] = email
         return context
 
@@ -183,16 +180,17 @@ class SignUpView(FormView):
         return super().get(request, **kwargs)
 
     def form_valid(self, form, **kwargs):
-        email = self.request.session["signup_email"]
+        token = self.kwargs["token"]
+        email = signing.loads(token)
         password = form.cleaned_data["password"]
         password = make_password(password)
         User.objects.create(username="ゲスト", email=email, password=password)
-        del self.request.session["signup_email"]
         return super().form_valid(form, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        email = self.request.session["signup_email"]
+        token = self.kwargs["token"]
+        email = signing.loads(token)
         context["email"] = email
         return context
 
