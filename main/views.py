@@ -18,6 +18,7 @@ from django.template.loader import get_template
 from django.urls import reverse_lazy, reverse
 from django.views.decorators.http import require_POST
 from django.views.generic import (
+    View,
     TemplateView,
     FormView,
     DetailView,
@@ -404,22 +405,21 @@ class AccountView(LoginRequiredMixin, DetailView):
 
         return context
 
+class FollowView(LoginRequiredMixin, View):
 
-@login_required
-def follow(request, pk):
-    follow = User.objects.get(pk=pk)
-    request.user.follow.add(follow)
-    request.user.save()
-    return redirect("account", pk)
+    def post(self,request, pk):
+        follow = User.objects.get(pk=pk)
+        request.user.follow.add(follow)
+        request.user.save()
+        return redirect("account", pk)
+    
+class UnfollowView(LoginRequiredMixin, View):
 
-
-@login_required
-def unfollow(request, pk):
-    follow = User.objects.get(pk=pk)
-    request.user.follow.remove(follow)
-    request.user.save()
-    return redirect("account", pk)
-
+    def post(self,request, pk):
+        follow = User.objects.get(pk=pk)
+        request.user.follow.remove(follow)
+        request.user.save()
+        return redirect("account", pk)
 
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "main/settings.html"

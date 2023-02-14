@@ -36,9 +36,15 @@
     {% else %}
     <div class="account-follow-btns">
         {% if object.is_follow %}
-        <a href="{% url 'unfollow' object.id %}" class="account-following-btn btn-visible">フォロー中</a>
+        <form action="{% url 'unfollow' object.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="account-following-btn">フォロー中</button>
+        </form>
         {% else %}
-        <a href="{% url 'follow' object.id %}" class="account-follow-btn">フォロー</a>
+        <form action="{% url 'follow' object.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="account-follow-btn">フォロー</button>
+        </form>
         {% endif %}
     </div>
     {% endif %}

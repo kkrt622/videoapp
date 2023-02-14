@@ -56,12 +56,12 @@ urlpatterns = [
     ),
     path(
         "unfollow/<int:pk>",
-        views.unfollow,
+        views.UnfollowView.as_view(),
         name="unfollow",
     ),
     path(
         "follow/<int:pk>",
-        views.follow,
+        views.FollowView.as_view(),
         name="follow",
     ),
     path(
