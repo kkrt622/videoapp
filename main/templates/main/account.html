@@ -71,41 +71,42 @@
     </div>
 </div>
 
+{% if object.id == request.user.id %}
 <!-- プロフィール編集画面 -->
-<div class="edit-profile">
-    <div class="edit-profile-title-container">
-        <i class="fa-solid fa-xmark fa-2x edit-profile-close"></i>
-        <h1>プロフィールを編集</h1>
-        <button type="submit" form="edit-form">保存</button>
+    <div class="edit-profile">
+        <div class="edit-profile-title-container">
+            <i class="fa-solid fa-xmark fa-2x edit-profile-close"></i>
+            <h1>プロフィールを編集</h1>
+            <button type="submit" form="edit-form">保存</button>
+        </div>
+        <form action="{% url 'account' object.id %}" method="POST" id="edit-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table class="edit-form-containers">
+                <div class="edit-icon">
+                    {{ form.icon }}
+                    <div class="account__icon">
+                        <img id="preview" src="{{object.icon_url}}">
+                    </div>
+                    <i class="fa-regular fa-image"></i>
+                </div>
+                <div class="edit-username-container">
+                    <div class="edit-username-text">
+                        {{ form.username.label }}
+                        <p class="required">必須</p>
+                    </div>
+                    <p class="edit-username-counter"><span id="edit-username-count">0</span>/50</p>
+                </div>
+                {{ form.username }}
+                <div class="edit-profile-container">
+                    <div class="edit-profile-text">
+                        {{ form.profile.label }}
+                    </div>
+                    <p class="edit-profile-counter"><span id="edit-profile-count">0</span>/500</p>
+                </div>
+                {{ form.profile }}
+            </table>
+        </form>
     </div>
-    <form action="{% url 'account' object.id %}" method="POST" id="edit-form" enctype="multipart/form-data">
-        {% csrf_token %}
-        <table class="edit-form-containers">
-            <div class="edit-icon">
-                {{ form.icon }}
-                <div class="account__icon">
-                    <img id="preview" src="{{object.icon_url}}">
-                </div>
-                <i class="fa-regular fa-image"></i>
-            </div>
-            <div class="edit-username-container">
-                <div class="edit-username-text">
-                    {{ form.username.label }}
-                    <p class="required">必須</p>
-                </div>
-                <p class="edit-username-counter"><span id="edit-username-count">0</span>/50</p>
-            </div>
-            {{ form.username }}
-            <div class="edit-profile-container">
-                <div class="edit-profile-text">
-                    {{ form.profile.label }}
-                </div>
-                <p class="edit-profile-counter"><span id="edit-profile-count">0</span>/500</p>
-            </div>
-            {{ form.profile }}
-        </table>
-    </form>
-</div>
 
 <!-- 設定画面 -->
 <div class="settings">
@@ -145,6 +146,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
