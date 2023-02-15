@@ -134,7 +134,7 @@ class TempRegistrationDoneView(FormView):
             signing.loads(token)
         except signing.BadSignature:
             messages.error(self.request, "無効なURLです。もう一度やり直してください")
-            return redirect("temp_registration")
+            return redirect("password_reset_email")
 
         if "email" in self.request.GET:
             email = self.request.GET.get("email")
@@ -202,12 +202,9 @@ class PasswordResetEmailView(FormView):
     model = User
 
     def form_valid(self, form):
-        email = form.cleaned_data["email"]
-        token = signing.dumps(email)
-        # メール送信
+        token = self.kwargs["token"]
+        email = signing.loads(token)
         password_reset_send_email(email)
-        # 送信内容をセッションに保存する
-        self.request.session["password_reset_email"] = email
         return redirect("password_reset_confirmation", token)
 
 
@@ -230,8 +227,8 @@ class PasswordResetConfirmationView(FormView):
         return super().get(request, **kwargs)
 
     def form_valid(self, form):
-        email = self.request.session.get("password_reset_email")
-        token = signing.dumps(email)
+        token = self.kwargs["token"]
+        email = signing.loads(token)
         input_code = form.cleaned_data["code"]
         context = {"form": form, "email": email}
         authentication_code_obj = AuthenticationCode.objects.get(email=email)
@@ -247,7 +244,8 @@ class PasswordResetConfirmationView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        email = self.request.session["password_reset_email"]
+        token = self.kwargs["token"]
+        email = signing.loads(token)
         context["email"] = email
         return context
 
@@ -267,7 +265,8 @@ class PasswordResetView(FormView):
         return super().get(request, **kwargs)
 
     def form_valid(self, form, **kwargs):
-        email = self.request.session["password_reset_email"]
+        token = self.kwargs["token"]
+        email = signing.loads(token)
         new_password = form.cleaned_data["new_password1"]
         new_password = make_password(new_password)
         user = User.objects.filter(email=email)
@@ -276,7 +275,8 @@ class PasswordResetView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        email = self.request.session["password_reset_email"]
+        token = self.kwargs["token"]
+        email = signing.loads(token)
         context["email"] = email
         return context
 
@@ -297,9 +297,7 @@ class EmailResetView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         new_email = form.cleaned_data["email"]
         token = signing.dumps(new_email)
-        # メール送信
         email_reset_send_email(new_email)
-        self.request.session["email_reset_email"] = new_email
         return redirect("email_reset_confirmation", token)
 
     def get_context_data(self, **kwargs):
@@ -329,8 +327,8 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
         return super().get(request, **kwargs)
 
     def form_valid(self, form):
-        new_email = self.request.session["email_reset_email"]
-        token = signing.dumps(new_email)
+        token = self.kwargs["token"]
+        new_email = signing.loads(token)
         input_code = form.cleaned_data["code"]
         authentication_code_obj = AuthenticationCode.objects.get(email=new_email)
         authentication_code = authentication_code_obj.code
@@ -348,7 +346,8 @@ class EmailResetConfirmationView(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        new_email = self.request.session["email_reset_email"]
+        token = self.kwargs["token"]
+        new_email = signing.loads(token)
         context["email"] = new_email
         return context
 
@@ -403,21 +402,22 @@ class AccountView(LoginRequiredMixin, DetailView):
 
         return context
 
-class FollowView(LoginRequiredMixin, View):
 
-    def post(self,request, pk):
+class FollowView(LoginRequiredMixin, View):
+    def post(self, request, pk):
         follow = User.objects.get(pk=pk)
         request.user.follow.add(follow)
         request.user.save()
         return redirect("account", pk)
-    
-class UnfollowView(LoginRequiredMixin, View):
 
-    def post(self,request, pk):
+
+class UnfollowView(LoginRequiredMixin, View):
+    def post(self, request, pk):
         follow = User.objects.get(pk=pk)
         request.user.follow.remove(follow)
         request.user.save()
         return redirect("account", pk)
+
 
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "main/settings.html"
