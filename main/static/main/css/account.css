@@ -85,9 +85,8 @@
     position: relative;
 }
 
-.account-follow-btns a {
-    width: 50%;
-    text-align: center;
+.account-follow-btns form {
+    width: 100%;
 }
 
 .account-following-btn {
@@ -99,6 +98,8 @@
     border: 1px solid #2B8F38;
     padding: 8.5px 80px;
     border-radius: 19px;
+    background-color: white;
+    width: 100%;
 }
 
 .account-follow-btn {
@@ -111,6 +112,7 @@
     background-color: #2B8F38;
     padding: 8.5px 80px;
     border-radius: 19px;
+    width: 100%;
 }
 
 .account-video-btns {
