@@ -65,7 +65,7 @@ class Video(models.Model):
         verbose_name_plural = "ビデオ"
 
     def file_name(self):
-        return os.path.basename(self.video.name).split(".")[0]
+        return os.path.splitext(os.path.basename(self.video.name))[0]
 
     def thumbnail_url(self):
         if self.thumbnail:

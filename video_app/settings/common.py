@@ -9,14 +9,24 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+from dotenv import load_dotenv
 import os
 
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv()
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# SECRET_KEY を読み込む
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+)
+
+# ...
+# DEBUG を読み込む
+DEBUG = os.getenv("DEBUG", "0").lower() in ("1", "on", "t", "true", "y", "yes")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -127,7 +137,34 @@ AUTH_USER_MODEL = "main.User"
 STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+# DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 AWS_LOCATION = "static/"
-AWS_STORAGE_BUCKET_NAME = "videoapp-upload-video"
+
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = '/media/'
+
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "django.core.files.storage.FileSystemStorage",
+#     },
+#     "staticfiles": {
+#         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+#     },
+# }
+
+STORAGES = {
+    "default": {
+        "BACKEND": "main.storage.MediaStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "main.storage.StaticStorage",
+    },
+}
+
+AWS_S3_ACCESS_KEY_ID = os.getenv("AWS_S3_ACCESS_KEY_ID")
+AWS_S3_SECRET_ACCESS_KEY = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+
+STATIC_ROOT = BASE_DIR / "staticfiles"

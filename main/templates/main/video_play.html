@@ -7,39 +7,22 @@
 
 {% block content %}
 <div class="video-player-container">
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <video id="video" controls width='100%'></video>
-
-    <!-- 動画の配信 -->
-    <script>
-        var video = document.getElementById('video');
-        var fileName = '{{video.file_name}}'
-        var playList = fileName + "_converted.m3u8"
-        var videoSrc = 'https://dm6lwimws6hfo.cloudfront.net/' + fileName + '/' + playList;
-        if (Hls.isSupported()) {
-            var hls = new Hls();
-            hls.loadSource(videoSrc);
-            hls.attachMedia(video);
-        }
-        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = videoSrc;
-        }
-    </script>
+    <video id="video" controls width="100%"></video>
 
     <div class="video-information-container">
-        <p class="video-title">{{video.title}}</p>
+        <p class="video-title">{{ video.title }}</p>
         <div class="video-detail-wrapper">
-            <p class="video-views">{{video.views_count}}回視聴&emsp;</p>
-            <p class="uploaded-elapsed-time">{{video.get_elapsed_time}}&emsp;</p>
-            <p class="video-uploaded-at">{{video.uploaded_date|date:"Y/m/d"}}</p>
+            <p class="video-views">{{ video.views_count }}回視聴&emsp;</p>
+            <p class="uploaded-elapsed-time">{{ video.get_elapsed_time }}&emsp;</p>
+            <p class="video-uploaded-at">{{ video.uploaded_date|date:"Y/m/d" }}</p>
         </div>
-        <a class="user-information-wrapper" href="{% url 'account' video.user.id %}">
-            <img src="{{video.user.icon_url}}">
-            <p class="video-creator">{{video.user.username}}</p>
+        <a class="user-information-wrapper" href="">
+            <img src="{{ video.user.icon_url }}">
+            <p class="video-creator">{{ video.user.username }}</p>
         </a>
         <hr noshade size="1">
         <div class="description-wrapper">
-            <p class="video-description">{{video.description}}</p>
+            <p class="video-description">{{ video.description|escapejs }}</p>
             <p class="more-button">もっと見る...</p>
         </div>
     </div>
@@ -47,40 +30,22 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
-    var viewCount = "{{video.views_count}}"
-    const url = new URL(window.location.href);
-    const params = url.searchParams;
-
-    document.addEventListener('DOMContentLoaded', function () {
-        // 視聴回数カウント
-        const video = document.getElementById("video")
-        video.addEventListener("play", function (event) {
-            viewCount++;
-            const xhr = new XMLHttpRequest();
-            const queryString = new URLSearchParams({ "views": viewCount }).toString();
-            const url = window.location.href.replace(/\?.*$/, "");
-            const requestPath = url + "?" + queryString;
-            xhr.open("GET", requestPath);
-            xhr.responseType = "document";
-            xhr.send();
-        }, { once: true })
-
-        // 「もっと見るボタン」
-        const moreBtn = document.querySelector('.more-button');
-        const videoDescription = document.querySelector('.video-description');
-        const videoDescriptionStr = videoDescription.textContent
-        const videoDescriptionLength = videoDescriptionStr.length;
-        if (videoDescriptionLength > 200) {
-            videoDescription.textContent = videoDescriptionStr.substring(0, 200) + '...'
-            moreBtn.addEventListener('click', function (ev) {
-                videoDescription.textContent = '{{video.description}}'
-                moreBtn.style.display = 'none'
-            })
-        }
-        else {
-            moreBtn.style.display = 'none'
-        }
-    })
+    const video = document.getElementById("video");
+    console.log("video", video);
+    const fileName = "{{ video.file_name }}"
+    console.log("fileName", fileName)
+    const playList = fileName + "_converted.m3u8"
+    console.log("playList", playList)
+    const videoSrc = "https://d7nxcmtda7n60.cloudfront.net/" + fileName + "/" + playList;
+    console.log("videoSrc", videoSrc)
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = videoSrc;
+    }
 </script>
 {% endblock %}
