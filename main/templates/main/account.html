@@ -143,7 +143,10 @@
                 <a href="{% url 'privacy_policy' %}" class="policy">プライバシーポリシー</a>
             </div>
             <div class="logout">
-                <a href="{% url 'logout' %}" class="logout-link">ログアウト</a>
+                <form action="{% url 'logout' %}" method="post" class="logout-link">
+                    {% csrf_token %}
+                    <button type="submit">ログアウト</button>
+                </form>
             </div>
             <div class="account-delete">
                 <p class="account-delete-text">アカウントの削除は</p>
